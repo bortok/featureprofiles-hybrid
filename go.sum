@@ -79,8 +79,8 @@ github.com/kylelemons/godebug v1.1.0/go.mod h1:9/0rRGxNHcop5bhtWyNeEfOS8JIWk580+
 github.com/mitchellh/go-wordwrap v1.0.1 h1:TLuKupo69TCn6TQSyGxwI1EblZZEsQ0vMlAFQflz0v0=
 github.com/mitchellh/go-wordwrap v1.0.1/go.mod h1:R62XHJLzvMFRBbcrT7m7WgmE1eOyTSsCt+hzestvNj0=
 github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e h1:fD57ERR4JtEqsWbfPhv4DMiApHyliiK5xCTNVSPiaAs=
-github.com/open-traffic-generator/ondatra v0.0.0-20220607130813-824f3690c390 h1:elETuXQQhIXRMq7avvNblakb9/uD8G+849zLBO2tE0U=
-github.com/open-traffic-generator/ondatra v0.0.0-20220607130813-824f3690c390/go.mod h1:eoLnsOVga8TUjfEyss2mBWcjngY1d4oUVb1OqFtFlPM=
+github.com/open-traffic-generator/ondatra v0.0.0-20220608065946-91db0d9d4ffa h1:JilJMfNBJnzvoZUMsQljprkmzVlNO1SMpgXsqpBzccU=
+github.com/open-traffic-generator/ondatra v0.0.0-20220608065946-91db0d9d4ffa/go.mod h1:eoLnsOVga8TUjfEyss2mBWcjngY1d4oUVb1OqFtFlPM=
 github.com/open-traffic-generator/snappi/gosnappi v0.7.37 h1:OZdJ6qYR0v3crCLuIqjNagkKUko2mGVj+qifSujnLpA=
 github.com/open-traffic-generator/snappi/gosnappi v0.7.37/go.mod h1:KsV29REx12Exw7BLWN/kI3m7euS4Vyyymh/63mrVl+s=
 github.com/openconfig/gnmi v0.0.0-20200414194230-1597cc0f2600/go.mod h1:M/EcuapNQgvzxo1DDXHK4tx3QpYM/uG4l591v33jG2A=
