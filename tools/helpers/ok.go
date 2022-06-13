@@ -9,6 +9,7 @@ import (
 )
 
 type ExpectedBgpMetrics struct {
+	State      gosnappi.Bgpv4MetricSessionStateEnum
 	Advertised int32
 	Received   int32
 }
@@ -45,6 +46,28 @@ func NewExpectedState() ExpectedState {
 		Isis: map[string]ExpectedIsisMetrics{},
 	}
 	return e
+}
+
+func Bgp4SessionAsExpected(t *testing.T, otg *ondatra.OTG, c gosnappi.Config, expectedState ExpectedState) (bool, error) {
+	dMetrics, err := GetBgpv4Metrics(t, otg, c)
+	if err != nil {
+		return false, err
+	}
+
+	PrintMetricsTable(&MetricsTableOpts{
+		ClearPrevious: false,
+		Bgpv4Metrics:  dMetrics,
+	})
+
+	expected := true
+	for _, d := range dMetrics.Items() {
+		expectedMetrics := expectedState.Bgp4[d.Name()]
+		if d.SessionState() != expectedMetrics.State || d.RoutesAdvertised() != expectedMetrics.Advertised || d.RoutesReceived() != expectedMetrics.Received {
+			expected = false
+		}
+	}
+
+	return expected, nil
 }
 
 func AllBgp4SessionUp(t *testing.T, otg *ondatra.OTG, c gosnappi.Config, expectedState ExpectedState) (bool, error) {
@@ -135,6 +158,36 @@ func FlowMetricsOk(t *testing.T, otg *ondatra.OTG, c gosnappi.Config, expectedSt
 	}
 
 	return expected, nil
+}
+
+func PortAndFlowMetricsOk(t *testing.T, otg *ondatra.OTG, c gosnappi.Config) (bool, error) {
+	expected := 0
+	for _, f := range c.Flows().Items() {
+		expected += int(f.Duration().FixedPackets().Packets())
+	}
+
+	fMetrics, err := GetFlowMetrics(t, otg, c)
+	if err != nil {
+		return false, err
+	}
+
+	pMetrics, err := GetPortMetrics(t, otg, c)
+	if err != nil {
+		return false, err
+	}
+
+	PrintMetricsTable(&MetricsTableOpts{
+		ClearPrevious: false,
+		FlowMetrics:   fMetrics,
+		PortMetrics:   pMetrics,
+	})
+
+	actual := 0
+	for _, m := range fMetrics.Items() {
+		actual += int(m.FramesRx())
+	}
+
+	return expected == actual, nil
 }
 
 func ArpEntriesOk(t *testing.T, otg *ondatra.OTG, ipType string, expectedMacEntries []string) (bool, error) {

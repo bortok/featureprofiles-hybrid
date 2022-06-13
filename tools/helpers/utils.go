@@ -543,3 +543,21 @@ func IncrementedMac(mac string, i int) string {
 	lastX := fmt.Sprintf("%02x", lastInt)
 	return r.FindStringSubmatch(mac)[1] + lastX
 }
+
+func GetFlowDestinationLocation(t *testing.T, otg *ondatra.OTG, c gosnappi.Config, framesRx int64) (string, error) {
+	fMetrics, err := GetFlowMetrics(t, otg, c)
+	if err != nil {
+		return "", err
+	}
+	for _, fMetric := range fMetrics.Items() {
+		if fMetric.FramesRx() == framesRx {
+			fName := fMetric.Name()
+			for _, cFlow := range c.Flows().Items() {
+				if cFlow.Name() == fName {
+					return cFlow.TxRx().Port().RxName(), nil
+				}
+			}
+		}
+	}
+	return "", fmt.Errorf("couldn't find any flow with given framesRx: %v", framesRx)
+}

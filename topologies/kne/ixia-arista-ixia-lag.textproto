@@ -25,13 +25,25 @@ nodes: {
         }
     }
     interfaces: {
-        key: "eth1"
+        key: "eth2"
         value: {
             group: "lag"
         }
     }
     interfaces: {
-        key: "eth2"
+        key: "eth3"
+        value: {
+            group: "lag"
+        }
+    }
+    interfaces: {
+        key: "eth4"
+        value: {
+            group: "lag"
+        }
+    }
+    interfaces: {
+        key: "eth5"
         value: {
             group: "lag"
         }
@@ -85,4 +97,16 @@ links: {
     a_int: "eth3"
     z_node: "otg"
     z_int: "eth3"
+}
+links: {
+    a_node: "arista"
+    a_int: "eth4"
+    z_node: "otg"
+    z_int: "eth4"
+}
+links: {
+    a_node: "arista"
+    a_int: "eth5"
+    z_node: "otg"
+    z_int: "eth5"
 }
