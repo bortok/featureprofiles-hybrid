@@ -561,3 +561,33 @@ func GetFlowDestinationLocation(t *testing.T, otg *ondatra.OTG, c gosnappi.Confi
 	}
 	return "", fmt.Errorf("couldn't find any flow with given framesRx: %v", framesRx)
 }
+
+func IndexOf(element string, data []string) int {
+	for k, v := range data {
+		if element == v {
+			return k
+		}
+	}
+	return -1 //not found.
+}
+
+func Remove(slice []string, s string) []string {
+	i := IndexOf(s, slice)
+	return append(slice[:i], slice[i+1:]...)
+}
+
+func UnorderedEqual(first, second []string) bool {
+	if len(first) != len(second) {
+		return false
+	}
+	exists := make(map[string]bool)
+	for _, value := range first {
+		exists[value] = true
+	}
+	for _, value := range second {
+		if !exists[value] {
+			return false
+		}
+	}
+	return true
+}
