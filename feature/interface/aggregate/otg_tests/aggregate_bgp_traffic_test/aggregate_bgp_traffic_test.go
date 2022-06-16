@@ -17,6 +17,7 @@ package rt_5_2_aggregate_bgp_traffic_test
 import (
 	"fmt"
 	"testing"
+	"time"
 
 	"github.com/open-traffic-generator/snappi/gosnappi"
 	"github.com/openconfig/featureprofiles/internal/fptest"
@@ -138,6 +139,35 @@ func TestAggregateBGPTraffic(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	t.Logf("Keep BGP running for 5s before Tx port switch")
+	time.Sleep(5 * time.Second)
+
+	// as up links >  min links
+	makeMemberPortDown(t, dut, "port2")
+
+	t.Logf("Check Interface status on DUT")
+	err = helpers.WaitFor(t, func() (bool, error) {
+		return verifyPortStatus(t, dut, "Port-Channel1", telemetry.Interface_OperStatus_UP)
+	}, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	expectedBundledPortsMap["Port-Channel1"] = helpers.Remove(expectedBundledPortsMap["Port-Channel1"], dut.Port(t, "port2").Name())
+	err = helpers.WaitFor(t, func() (bool, error) { return bundledPortsAsExpected(t, dut, expectedBundledPortsMap) }, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	t.Logf("Keep BGP running for 15s before Tx port switch")
+	time.Sleep(20 * time.Second)
+
+	t.Logf("Check BGP sessions on OTG after port switch")
+	err = helpers.WaitFor(t, func() (bool, error) { return helpers.Bgp4SessionAsExpected(t, otg, config, expected) }, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	otg.StartTraffic(t)
 
 	t.Logf("Check Flow stats on OTG")
@@ -155,47 +185,7 @@ func TestAggregateBGPTraffic(t *testing.T) {
 
 	t.Logf("All packets are being received by port %s", rPortId)
 
-	// as up links > min links
-	makeMemberPortDown(t, dut, rPortId)
-
-	t.Logf("Check Interface status on DUT")
-	err = helpers.WaitFor(t, func() (bool, error) {
-		return verifyPortStatus(t, dut, "Port-Channel1", telemetry.Interface_OperStatus_UP)
-	}, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	expectedBundledPortsMap["Port-Channel1"] = helpers.Remove(expectedBundledPortsMap["Port-Channel1"], dut.Port(t, rPortId).Name())
-	err = helpers.WaitFor(t, func() (bool, error) { return bundledPortsAsExpected(t, dut, expectedBundledPortsMap) }, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	t.Logf("Check BGP sessions on OTG")
-	err = helpers.WaitFor(t, func() (bool, error) { return helpers.Bgp4SessionAsExpected(t, otg, config, expected) }, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	otg.StartTraffic(t)
-
-	t.Logf("Check Flow stats on OTG")
-	err = helpers.WaitFor(t, func() (bool, error) { return helpers.PortAndFlowMetricsOk(t, otg, config) }, nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	rPortId, err = helpers.GetFlowDestinationLocation(t, otg, config, 400)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	otg.StopTraffic(t)
-
-	t.Logf("All packets are being received by port %s", rPortId)
-
-	// as up links = min links
+	// as up links =  min links
 	makeMemberPortDown(t, dut, rPortId)
 
 	t.Logf("Check Interface status on DUT")
