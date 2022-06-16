@@ -159,7 +159,7 @@ func TestAggregateBGPTraffic(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	t.Logf("Keep BGP running for 15s before Tx port switch")
+	t.Logf("Keep BGP running for 20s After Tx port switch")
 	time.Sleep(20 * time.Second)
 
 	t.Logf("Check BGP sessions on OTG after port switch")
