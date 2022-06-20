@@ -269,8 +269,6 @@ func configureOTG(t *testing.T, otg *ondatra.OTG) (gosnappi.Config, helpers.Expe
 		SetActorPortPriority(1).
 		SetActorSystemId("01:01:01:01:01:01").
 		SetActorSystemPriority(1).
-		SetLacpduPeriodicTimeInterval(1).
-		SetLacpduTimeout(1).
 		SetActorActivity("active")
 
 	lag1port1.Ethernet().SetName("lag1.port1.eth").
@@ -284,8 +282,6 @@ func configureOTG(t *testing.T, otg *ondatra.OTG) (gosnappi.Config, helpers.Expe
 		SetActorPortPriority(1).
 		SetActorSystemId("01:01:01:01:01:01").
 		SetActorSystemPriority(1).
-		SetLacpduPeriodicTimeInterval(1).
-		SetLacpduTimeout(1).
 		SetActorActivity("active")
 
 	lag1port2.Ethernet().SetName("lag1.port2.eth").
@@ -299,8 +295,6 @@ func configureOTG(t *testing.T, otg *ondatra.OTG) (gosnappi.Config, helpers.Expe
 		SetActorPortPriority(1).
 		SetActorSystemId("01:01:01:01:01:01").
 		SetActorSystemPriority(1).
-		SetLacpduPeriodicTimeInterval(1).
-		SetLacpduTimeout(1).
 		SetActorActivity("active")
 
 	lag1port3.Ethernet().SetName("lag1.port3.eth").
@@ -314,8 +308,6 @@ func configureOTG(t *testing.T, otg *ondatra.OTG) (gosnappi.Config, helpers.Expe
 		SetActorPortPriority(1).
 		SetActorSystemId("01:01:01:01:01:01").
 		SetActorSystemPriority(1).
-		SetLacpduPeriodicTimeInterval(1).
-		SetLacpduTimeout(1).
 		SetActorActivity("active")
 
 	lag1port4.Ethernet().SetName("lag1.port4.eth").
