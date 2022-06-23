@@ -81,8 +81,8 @@ github.com/mitchellh/go-wordwrap v1.0.1/go.mod h1:R62XHJLzvMFRBbcrT7m7WgmE1eOyTS
 github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e h1:fD57ERR4JtEqsWbfPhv4DMiApHyliiK5xCTNVSPiaAs=
 github.com/open-traffic-generator/ondatra v0.0.0-20220608065946-91db0d9d4ffa h1:JilJMfNBJnzvoZUMsQljprkmzVlNO1SMpgXsqpBzccU=
 github.com/open-traffic-generator/ondatra v0.0.0-20220608065946-91db0d9d4ffa/go.mod h1:eoLnsOVga8TUjfEyss2mBWcjngY1d4oUVb1OqFtFlPM=
-github.com/open-traffic-generator/snappi/gosnappi v0.7.41 h1:Xvz58ZdZm2U4NEkkFBxwsVjIdeTMxDVZbXI7ECixNyY=
-github.com/open-traffic-generator/snappi/gosnappi v0.7.41/go.mod h1:E6+yAyd4wnVQxSale66qQzffSp04mwqI/MBocPtbipE=
+github.com/open-traffic-generator/snappi/gosnappi v0.8.2 h1:wGMoEzI8LhpzFnFHnQR0rGHaAu18a2BJ+r3Cl/Mao9o=
+github.com/open-traffic-generator/snappi/gosnappi v0.8.2/go.mod h1:JUW9/UK/zLqqhGvYJB6Moj+9E/CLPxaLO38Jj8yR+Vs=
 github.com/openconfig/gnmi v0.0.0-20200414194230-1597cc0f2600/go.mod h1:M/EcuapNQgvzxo1DDXHK4tx3QpYM/uG4l591v33jG2A=
 github.com/openconfig/gnmi v0.0.0-20200508230933-d19cebf5e7be/go.mod h1:M/EcuapNQgvzxo1DDXHK4tx3QpYM/uG4l591v33jG2A=
 github.com/openconfig/gnmi v0.0.0-20210527163611-d3a3e30199da/go.mod h1:H/20NXlnWbCPFC593nxpiKJ+OU//7mW7s7Qk7uVdg3Q=
@@ -127,12 +127,14 @@ github.com/protocolbuffers/txtpbfmt v0.0.0-20220131092820-39736dd543b4 h1:t0R4wR
 github.com/protocolbuffers/txtpbfmt v0.0.0-20220131092820-39736dd543b4/go.mod h1:lqKDuJp+gFrjIzf8LR/daIFsmcKkP6fmczWBs/7n39k=
 github.com/rogpeppe/fastuuid v1.2.0/go.mod h1:jVj6XXZzXRy/MSR5jhDC/2q6DgLz+nrA6LYCDYWNEvQ=
 github.com/stretchr/objx v0.1.0/go.mod h1:HFkY916IF+rwdDfMAkV7OtwuqBVzrE8GR6GFx+wExME=
+github.com/stretchr/objx v0.4.0/go.mod h1:YvHI0jy2hoMjB+UWwv71VJQ9isScKT/TqJzVSSt89Yw=
 github.com/stretchr/testify v1.1.5-0.20170809224252-890a5c3458b4/go.mod h1:a8OnRcib4nhh0OaRAV+Yts87kKdq0PP7pXfy6kDkUVs=
 github.com/stretchr/testify v1.3.0/go.mod h1:M5WIy9Dh21IEIfnGCwXGc5bZfKNJtfHm1UVUgZn+9EI=
 github.com/stretchr/testify v1.5.1/go.mod h1:5W2xD1RspED5o8YsWQXVCued0rvSQ+mT+I5cxcmMvtA=
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
-github.com/stretchr/testify v1.7.2 h1:4jaiDzPyXQvSd7D0EjG45355tLlV3VOECpq10pLC+8s=
-github.com/stretchr/testify v1.7.2/go.mod h1:R6va5+xMeoiuVRoj+gSkQ7d3FALtqAAGI1FQKckRals=
+github.com/stretchr/testify v1.7.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
+github.com/stretchr/testify v1.7.4 h1:wZRexSlwd7ZXfKINDLsO4r7WBt3gTKONc6K/VesHvHM=
+github.com/stretchr/testify v1.7.4/go.mod h1:yNjHg4UonilssWZ8iaSj1OCr/vHnekPRkoO+kdMU+MU=
 go.opentelemetry.io/proto/otlp v0.7.0/go.mod h1:PqfVotwruBrMGOCsRd/89rSnXhoiJIqeYNgFYFoEGnI=
 go.uber.org/atomic v1.7.0 h1:ADUqmZGgLDDfbSL9ZmPxKTybcoEYHgpYfELNoN+7hsw=
 go.uber.org/atomic v1.7.0/go.mod h1:fEN4uk6kAWBTFdckzkM89CLk9XfWZrxpCo0nPH17wJc=
