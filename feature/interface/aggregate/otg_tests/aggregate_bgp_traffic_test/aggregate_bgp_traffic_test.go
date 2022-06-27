@@ -260,58 +260,47 @@ func configureOTG(t *testing.T, otg *ondatra.OTG) (gosnappi.Config, helpers.Expe
 
 	// lag1
 	lag1 := config.Lags().Add().SetName("lag1")
+	lag1.Protocol().Lacp().SetActorKey(1).SetActorSystemId("01:01:01:01:01:01").SetActorSystemPriority(1)
 
 	// port2 as port of lag1
-	lag1port1 := lag1.Ports().Add().SetPortName(port2.Name())
-	lag1port1.Protocol().SetChoice("lacp").Lacp().
-		SetActorKey(1).
+	lag1port1 := lag1.Ports().Add().
+		SetPortName(port2.Name())
+	lag1port1.Lacp().
+		SetActorActivity("active").
 		SetActorPortNumber(1).
 		SetActorPortPriority(1).
-		SetActorSystemId("01:01:01:01:01:01").
-		SetActorSystemPriority(1).
-		SetActorActivity("active")
-
-	lag1port1.Ethernet().SetName("lag1.port1.eth").
-		SetMac("00:00:00:00:00:16")
+		SetLacpduTimeout(0)
+	lag1port1.Ethernet().SetMac("00:00:00:00:00:16").SetName("lag1.port1.eth")
 
 	// port3 as port of lag1
-	lag1port2 := lag1.Ports().Add().SetPortName(port3.Name())
-	lag1port2.Protocol().SetChoice("lacp").Lacp().
-		SetActorKey(1).
+	lag1port2 := lag1.Ports().Add().
+		SetPortName(port3.Name())
+	lag1port2.Lacp().
+		SetActorActivity("active").
 		SetActorPortNumber(2).
 		SetActorPortPriority(1).
-		SetActorSystemId("01:01:01:01:01:01").
-		SetActorSystemPriority(1).
-		SetActorActivity("active")
-
-	lag1port2.Ethernet().SetName("lag1.port2.eth").
-		SetMac("00:00:00:00:00:17")
+		SetLacpduTimeout(0)
+	lag1port1.Ethernet().SetMac("00:00:00:00:00:17").SetName("lag1.port2.eth")
 
 	// port4 as port of lag1
-	lag1port3 := lag1.Ports().Add().SetPortName(port4.Name())
-	lag1port3.Protocol().SetChoice("lacp").Lacp().
-		SetActorKey(1).
+	lag1port3 := lag1.Ports().Add().
+		SetPortName(port4.Name())
+	lag1port3.Lacp().
+		SetActorActivity("active").
 		SetActorPortNumber(3).
 		SetActorPortPriority(1).
-		SetActorSystemId("01:01:01:01:01:01").
-		SetActorSystemPriority(1).
-		SetActorActivity("active")
-
-	lag1port3.Ethernet().SetName("lag1.port3.eth").
-		SetMac("00:00:00:00:00:18")
+		SetLacpduTimeout(0)
+	lag1port1.Ethernet().SetMac("00:00:00:00:00:18").SetName("lag1.port3.eth")
 
 	// port5 as port of lag1
-	lag1port4 := lag1.Ports().Add().SetPortName(port5.Name())
-	lag1port4.Protocol().SetChoice("lacp").Lacp().
-		SetActorKey(1).
+	lag1port4 := lag1.Ports().Add().
+		SetPortName(port5.Name())
+	lag1port4.Lacp().
+		SetActorActivity("active").
 		SetActorPortNumber(4).
 		SetActorPortPriority(1).
-		SetActorSystemId("01:01:01:01:01:01").
-		SetActorSystemPriority(1).
-		SetActorActivity("active")
-
-	lag1port4.Ethernet().SetName("lag1.port4.eth").
-		SetMac("00:00:00:00:00:19")
+		SetLacpduTimeout(0)
+	lag1port1.Ethernet().SetMac("00:00:00:00:00:19").SetName("lag1.port4.eth")
 
 	// device on port1
 	p1d1 := config.Devices().Add().SetName("p1d1")
