@@ -344,7 +344,7 @@ func TestAggregateBGPTraffic(t *testing.T) {
 	}
 
 	// as up links < min links
-	fmt.Println("Making Lag Member port4 down")
+	fmt.Println("Making Lag Member port4 down ")
 	otg.DownLacpMember(t, []string{"port4"})
 	makeMemberPortDown(t, dut, "port4")
 
