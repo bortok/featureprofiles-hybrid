@@ -384,6 +384,7 @@ func configureOTG(t *testing.T, otg *ondatra.OTG, expectedRoutes int32) (gosnapp
 		SetPeerAddress(srcIpv4.Gateway()).
 		SetAsNumber(ateAS).
 		SetAsType(gosnappi.BgpV4PeerAsType.EBGP)
+	srcBgp4Peer.LearnedInformationFilter().SetUnicastIpv4Prefix(true).SetUnicastIpv6Prefix(true)
 	srcBgp6Peer := srcBgp.Ipv6Interfaces().Add().
 		SetIpv6Name(srcIpv6.Name()).
 		Peers().Add().
@@ -391,7 +392,7 @@ func configureOTG(t *testing.T, otg *ondatra.OTG, expectedRoutes int32) (gosnapp
 		SetPeerAddress(srcIpv6.Gateway()).
 		SetAsNumber(ateAS).
 		SetAsType(gosnappi.BgpV6PeerAsType.EBGP)
-
+	srcBgp6Peer.LearnedInformationFilter().SetUnicastIpv4Prefix(true).SetUnicastIpv6Prefix(true)
 	dstBgp4Name := ateDst.Name + ".bgp4.peer"
 	dstBgp6Name := ateDst.Name + ".bgp6.peer"
 	dstBgp := dstDev.Bgp().
@@ -403,6 +404,8 @@ func configureOTG(t *testing.T, otg *ondatra.OTG, expectedRoutes int32) (gosnapp
 		SetPeerAddress(dstIpv4.Gateway()).
 		SetAsNumber(ateAS).
 		SetAsType(gosnappi.BgpV4PeerAsType.EBGP)
+
+	dstBgp4Peer.LearnedInformationFilter().SetUnicastIpv4Prefix(true).SetUnicastIpv6Prefix(true)
 	dstBgp6Peer := dstBgp.Ipv6Interfaces().Add().
 		SetIpv6Name(dstIpv6.Name()).
 		Peers().Add().
@@ -410,7 +413,7 @@ func configureOTG(t *testing.T, otg *ondatra.OTG, expectedRoutes int32) (gosnapp
 		SetPeerAddress(dstIpv6.Gateway()).
 		SetAsNumber(ateAS).
 		SetAsType(gosnappi.BgpV6PeerAsType.EBGP)
-
+	dstBgp6Peer.LearnedInformationFilter().SetUnicastIpv4Prefix(true).SetUnicastIpv6Prefix(true)
 	prefixInt4, _ := strconv.Atoi(strings.Split(advertisedRoutesv4CIDR, "/")[1])
 	prefixInt6, _ := strconv.Atoi(strings.Split(advertisedRoutesv6CIDR, "/")[1])
 	dstBgp4PeerRoutes := dstBgp4Peer.V4Routes().Add().

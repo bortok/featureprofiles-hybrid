@@ -2,6 +2,7 @@ package helpers
 
 import (
 	"log"
+	"strings"
 	"testing"
 	"time"
 
@@ -76,17 +77,17 @@ func GetBgpv4Metrics(t *testing.T, otg *ondatra.OTG, c gosnappi.Config) (gosnapp
 			for _, peer := range ip.Peers().Items() {
 				log.Printf("Getting bgpv4 metrics for peer %s\n", peer.Name())
 				bgpv4Metric := metrics.Add()
-				recvMetric := otg.Telemetry().BgpPeer(peer.Name()).Get(t)
-				bgpv4Metric.SetName(recvMetric.GetName())
-				bgpv4Metric.SetSessionFlapCount(int32(recvMetric.GetCounters().GetFlaps()))
-				bgpv4Metric.SetRoutesAdvertised(int32(recvMetric.GetCounters().GetOutRoutes()))
-				bgpv4Metric.SetRoutesReceived(int32(recvMetric.GetCounters().GetInRoutes()))
-				bgpv4Metric.SetRouteWithdrawsSent(int32(recvMetric.GetCounters().GetOutRouteWithdraw()))
-				bgpv4Metric.SetRouteWithdrawsReceived(int32(recvMetric.GetCounters().GetInRouteWithdraw()))
-				bgpv4Metric.SetKeepalivesSent(int32(recvMetric.GetCounters().GetOutKeepalives()))
-				bgpv4Metric.SetKeepalivesReceived(int32(recvMetric.GetCounters().GetInKeepalives()))
-				sessionState := recvMetric.GetSessionState()
-				if sessionState == otgtelemetry.BgpPeer_SessionState_ESTABLISHED {
+				recvMetricState := otg.Telemetry().BgpPeer(peer.Name()).SessionState().Get(t)
+				recvMetricCounter := otg.Telemetry().BgpPeer(peer.Name()).Counters().Get(t)
+				bgpv4Metric.SetName(peer.Name())
+				bgpv4Metric.SetSessionFlapCount(int32(recvMetricCounter.GetFlaps()))
+				bgpv4Metric.SetRoutesAdvertised(int32(recvMetricCounter.GetOutRoutes()))
+				bgpv4Metric.SetRoutesReceived(int32(recvMetricCounter.GetInRoutes()))
+				bgpv4Metric.SetRouteWithdrawsSent(int32(recvMetricCounter.GetOutRouteWithdraw()))
+				bgpv4Metric.SetRouteWithdrawsReceived(int32(recvMetricCounter.GetInRouteWithdraw()))
+				bgpv4Metric.SetKeepalivesSent(int32(recvMetricCounter.GetOutKeepalives()))
+				bgpv4Metric.SetKeepalivesReceived(int32(recvMetricCounter.GetInKeepalives()))
+				if recvMetricState == otgtelemetry.BgpPeer_SessionState_ESTABLISHED {
 					bgpv4Metric.SetSessionState("up")
 				} else {
 					bgpv4Metric.SetSessionState("down")
@@ -106,17 +107,17 @@ func GetBgpv6Metrics(t *testing.T, otg *ondatra.OTG, c gosnappi.Config) (gosnapp
 			for _, peer := range ipv6.Peers().Items() {
 				log.Printf("Getting bgpv6 metrics for peer %s\n", peer.Name())
 				bgpv6Metric := metrics.Add()
-				recvMetric := otg.Telemetry().BgpPeer(peer.Name()).Get(t)
-				bgpv6Metric.SetName(recvMetric.GetName())
-				bgpv6Metric.SetSessionFlapCount(int32(recvMetric.GetCounters().GetFlaps()))
-				bgpv6Metric.SetRoutesAdvertised(int32(recvMetric.GetCounters().GetOutRoutes()))
-				bgpv6Metric.SetRoutesReceived(int32(recvMetric.GetCounters().GetInRoutes()))
-				bgpv6Metric.SetRouteWithdrawsSent(int32(recvMetric.GetCounters().GetOutRouteWithdraw()))
-				bgpv6Metric.SetRouteWithdrawsReceived(int32(recvMetric.GetCounters().GetInRouteWithdraw()))
-				bgpv6Metric.SetKeepalivesSent(int32(recvMetric.GetCounters().GetOutKeepalives()))
-				bgpv6Metric.SetKeepalivesReceived(int32(recvMetric.GetCounters().GetInKeepalives()))
-				sessionState := recvMetric.GetSessionState()
-				if sessionState == otgtelemetry.BgpPeer_SessionState_ESTABLISHED {
+				recvMetricState := otg.Telemetry().BgpPeer(peer.Name()).SessionState().Get(t)
+				recvMetricCounter := otg.Telemetry().BgpPeer(peer.Name()).Counters().Get(t)
+				bgpv6Metric.SetName(peer.Name())
+				bgpv6Metric.SetSessionFlapCount(int32(recvMetricCounter.GetFlaps()))
+				bgpv6Metric.SetRoutesAdvertised(int32(recvMetricCounter.GetOutRoutes()))
+				bgpv6Metric.SetRoutesReceived(int32(recvMetricCounter.GetInRoutes()))
+				bgpv6Metric.SetRouteWithdrawsSent(int32(recvMetricCounter.GetOutRouteWithdraw()))
+				bgpv6Metric.SetRouteWithdrawsReceived(int32(recvMetricCounter.GetInRouteWithdraw()))
+				bgpv6Metric.SetKeepalivesSent(int32(recvMetricCounter.GetOutKeepalives()))
+				bgpv6Metric.SetKeepalivesReceived(int32(recvMetricCounter.GetInKeepalives()))
+				if recvMetricState == otgtelemetry.BgpPeer_SessionState_ESTABLISHED {
 					bgpv6Metric.SetSessionState("up")
 				} else {
 					bgpv6Metric.SetSessionState("down")
@@ -231,4 +232,124 @@ func GetAllIPv4NeighborMacEntries(t *testing.T, otg *ondatra.OTG) ([]string, err
 func GetAllIPv6NeighborMacEntries(t *testing.T, otg *ondatra.OTG) ([]string, error) {
 	macEntries := otg.Telemetry().InterfaceAny().Ipv6NeighborAny().LinkLayerAddress().Get(t)
 	return macEntries, nil
+}
+
+func GetBGPPrefix(t *testing.T, otg *ondatra.OTG, c gosnappi.Config) (gosnappi.StatesResponseBgpPrefixesStateIter, error) {
+	states := gosnappi.NewApi().NewGetStatesResponse().StatusCode200().BgpPrefixes()
+	for _, d := range c.Devices().Items() {
+		bgp := d.Bgp()
+		for _, ip := range bgp.Ipv4Interfaces().Items() {
+			for _, peer := range ip.Peers().Items() {
+				log.Printf("Getting bgp prefix for peer %s\n", peer.Name())
+
+				bgpv4PeerState := states.Add().SetBgpPeerName(peer.Name())
+				ipv4Prefixes := otg.Telemetry().BgpPeer(peer.Name()).UnicastIpv4PrefixAny().Get(t)
+				stateIpv4Prefix := bgpv4PeerState.Ipv4UnicastPrefixes()
+				for _, ipv4Prefix := range ipv4Prefixes {
+					stateIpv4Prefix.Add().SetIpv4Address(ipv4Prefix.GetAddress()).
+						SetIpv4NextHop(ipv4Prefix.GetNextHopIpv4Address()).
+						SetIpv6NextHop(ipv4Prefix.GetNextHopIpv6Address()).
+						SetOrigin(gosnappi.BgpPrefixIpv4UnicastStateOriginEnum(ipv4Prefix.GetOrigin().String())).
+						SetPathId(int32(ipv4Prefix.GetPathId())).
+						SetPrefixLength(int32(ipv4Prefix.GetPrefixLength()))
+				}
+
+				ipv6Prefixes := otg.Telemetry().BgpPeer(peer.Name()).UnicastIpv6PrefixAny().Get(t)
+				stateIpv6Prefix := bgpv4PeerState.Ipv6UnicastPrefixes()
+				for _, ipv6Prefix := range ipv6Prefixes {
+					stateIpv6Prefix.Add().SetIpv6Address(ipv6Prefix.GetAddress()).
+						SetIpv4NextHop(ipv6Prefix.GetNextHopIpv4Address()).
+						SetIpv6NextHop(ipv6Prefix.GetNextHopIpv6Address()).
+						SetOrigin(gosnappi.BgpPrefixIpv6UnicastStateOriginEnum(ipv6Prefix.GetOrigin().String())).
+						SetPathId(int32(ipv6Prefix.GetPathId())).
+						SetPrefixLength(int32(ipv6Prefix.GetPrefixLength()))
+				}
+			}
+		}
+
+		for _, ipv6 := range bgp.Ipv6Interfaces().Items() {
+			for _, peer := range ipv6.Peers().Items() {
+				log.Printf("Getting bgp prefix for peer %s\n", peer.Name())
+
+				bgpv6PeerState := states.Add().SetBgpPeerName(peer.Name())
+				ipv4Prefixes := otg.Telemetry().BgpPeer(peer.Name()).UnicastIpv4PrefixAny().Get(t)
+				stateIpv4Prefix := bgpv6PeerState.Ipv4UnicastPrefixes()
+				for _, ipv4Prefix := range ipv4Prefixes {
+					stateIpv4Prefix.Add().SetIpv4Address(ipv4Prefix.GetAddress()).
+						SetIpv4NextHop(ipv4Prefix.GetNextHopIpv4Address()).
+						SetIpv6NextHop(ipv4Prefix.GetNextHopIpv6Address()).
+						SetOrigin(gosnappi.BgpPrefixIpv4UnicastStateOriginEnum(ipv4Prefix.GetOrigin().String())).
+						SetPathId(int32(ipv4Prefix.GetPathId())).
+						SetPrefixLength(int32(ipv4Prefix.GetPrefixLength()))
+				}
+
+				ipv6Prefixes := otg.Telemetry().BgpPeer(peer.Name()).UnicastIpv6PrefixAny().Get(t)
+				stateIpv6Prefix := bgpv6PeerState.Ipv6UnicastPrefixes()
+				for _, ipv6Prefix := range ipv6Prefixes {
+					stateIpv6Prefix.Add().SetIpv6Address(ipv6Prefix.GetAddress()).
+						SetIpv4NextHop(ipv6Prefix.GetNextHopIpv4Address()).
+						SetIpv6NextHop(ipv6Prefix.GetNextHopIpv6Address()).
+						SetOrigin(gosnappi.BgpPrefixIpv6UnicastStateOriginEnum(ipv6Prefix.GetOrigin().String())).
+						SetPathId(int32(ipv6Prefix.GetPathId())).
+						SetPrefixLength(int32(ipv6Prefix.GetPrefixLength()))
+				}
+			}
+		}
+	}
+
+	PrintStatesTable(&StatesTableOpts{
+		ClearPrevious: true,
+		BgpPrefixes:   states,
+	})
+	return states, nil
+}
+
+func GetLagMetric(t *testing.T, otg *ondatra.OTG, c gosnappi.Config) (gosnappi.MetricsResponseLagMetricIter, error) {
+	defer Timer(time.Now(), "GetLagMetrics GNMI")
+	metrics := gosnappi.NewApi().NewGetMetricsResponse().StatusCode200().LagMetrics()
+	for _, l := range c.Lags().Items() {
+		log.Printf("Getting Lag metrics for lag %s\n", l.Name())
+		lagMetric := metrics.Add()
+		recvMetric := otg.Telemetry().Lag(l.Name()).Get(t)
+		lagMetric.SetName(l.Name())
+		lagMetric.SetOperStatus(gosnappi.LagMetricOperStatusEnum(strings.ToLower(recvMetric.GetOperStatus().String())))
+		lagMetric.SetMemberPortsUp(int32(recvMetric.GetCounters().GetMemberPortsUp()))
+		lagMetric.SetBytesRx(int64(recvMetric.GetCounters().GetInOctets()))
+		lagMetric.SetBytesTx(int64(recvMetric.GetCounters().GetOutOctets()))
+		lagMetric.SetFramesRx(int64(recvMetric.GetCounters().GetInFrames()))
+		lagMetric.SetFramesTx(int64(recvMetric.GetCounters().GetOutFrames()))
+		lagMetric.SetFramesRxRate(ygot.BinaryToFloat32(recvMetric.GetInRate()))
+		lagMetric.SetFramesTxRate(ygot.BinaryToFloat32(recvMetric.GetOutRate()))
+	}
+	return metrics, nil
+}
+
+func GetLacpMetric(t *testing.T, otg *ondatra.OTG, c gosnappi.Config) (gosnappi.MetricsResponseLacpLagMemberMetricIter, error) {
+	defer Timer(time.Now(), "GetLacpMetrics GNMI")
+	metrics := gosnappi.NewApi().NewGetMetricsResponse().StatusCode200().LacpLagMemberMetrics()
+	for _, l := range c.Lags().Items() {
+		lagPorts := l.Ports().Items()
+		for _, lagPort := range lagPorts {
+			log.Printf("Getting Lacp metrics for port %s in lag %s\n", lagPort.PortName(), l.Name())
+			lacpMetric := metrics.Add()
+			recvMetric := otg.Telemetry().Lacp().LagMember(lagPort.PortName()).Get(t)
+			lacpMetric.SetLagName(l.Name())
+			lacpMetric.SetLagMemberPortName(lagPort.PortName())
+			lacpMetric.SetActivity(gosnappi.LacpLagMemberMetricActivityEnum(strings.ToLower(recvMetric.GetActivity().String())))
+			lacpMetric.SetAggregatable(recvMetric.GetAggregatable())
+			lacpMetric.SetCollecting(recvMetric.GetCollecting())
+			lacpMetric.SetDistributing(recvMetric.GetDistributing())
+			lacpMetric.SetLacpInPkts(int64(recvMetric.GetCounters().GetLacpInPkts()))
+			lacpMetric.SetLacpOutPkts(int64(recvMetric.GetCounters().GetLacpOutPkts()))
+			lacpMetric.SetLacpRxErrors(int64(recvMetric.GetCounters().GetLacpRxErrors()))
+			lacpMetric.SetPortNum(int32(recvMetric.GetPortNum()))
+			lacpMetric.SetPartnerPortNum(int32(recvMetric.GetPartnerPortNum()))
+			lacpMetric.SetTimeout(gosnappi.LacpLagMemberMetricTimeoutEnum(strings.ToLower(recvMetric.GetTimeout().String())))
+			lacpMetric.SetPartnerKey(int32(recvMetric.GetPartnerKey()))
+			lacpMetric.SetPartnerId(recvMetric.GetPartnerId())
+			lacpMetric.SetSystemId(recvMetric.GetSystemId())
+			lacpMetric.SetSynchronization(gosnappi.LacpLagMemberMetricSynchronizationEnum(strings.ToLower(recvMetric.GetSynchronization().String())))
+		}
+	}
+	return metrics, nil
 }

@@ -29,12 +29,25 @@ type ExpectedFlowMetrics struct {
 	FramesRxRate float32
 }
 
+type ExpectedLagMetrics struct {
+	Status        gosnappi.LagMetricOperStatusEnum
+	MemberPortsUp int32
+}
+
+type ExpectedLacpMetrics struct {
+	Lag          string
+	Collecting   bool
+	Distributing bool
+}
+
 type ExpectedState struct {
 	Port map[string]ExpectedPortMetrics
 	Flow map[string]ExpectedFlowMetrics
 	Bgp4 map[string]ExpectedBgpMetrics
 	Bgp6 map[string]ExpectedBgpMetrics
 	Isis map[string]ExpectedIsisMetrics
+	Lag  map[string]ExpectedLagMetrics
+	Lacp map[string]ExpectedLacpMetrics
 }
 
 func NewExpectedState() ExpectedState {
@@ -63,6 +76,50 @@ func Bgp4SessionAsExpected(t *testing.T, otg *ondatra.OTG, c gosnappi.Config, ex
 	for _, d := range dMetrics.Items() {
 		expectedMetrics := expectedState.Bgp4[d.Name()]
 		if d.SessionState() != expectedMetrics.State || d.RoutesAdvertised() != expectedMetrics.Advertised || d.RoutesReceived() != expectedMetrics.Received {
+			expected = false
+		}
+	}
+
+	return expected, nil
+}
+
+func LagAsExpected(t *testing.T, otg *ondatra.OTG, c gosnappi.Config, expectedState ExpectedState) (bool, error) {
+	dMetrics, err := GetLagMetric(t, otg, c)
+	if err != nil {
+		return false, err
+	}
+
+	PrintMetricsTable(&MetricsTableOpts{
+		ClearPrevious: false,
+		LagMetrics:    dMetrics,
+	})
+
+	expected := true
+	for _, d := range dMetrics.Items() {
+		expectedMetrics := expectedState.Lag[d.Name()]
+		if d.OperStatus() != expectedMetrics.Status || d.MemberPortsUp() != expectedMetrics.MemberPortsUp {
+			expected = false
+		}
+	}
+
+	return expected, nil
+}
+
+func LacpAsExpected(t *testing.T, otg *ondatra.OTG, c gosnappi.Config, expectedState ExpectedState) (bool, error) {
+	dMetrics, err := GetLacpMetric(t, otg, c)
+	if err != nil {
+		return false, err
+	}
+
+	PrintMetricsTable(&MetricsTableOpts{
+		ClearPrevious: false,
+		LacpMetrics:   dMetrics,
+	})
+
+	expected := true
+	for _, d := range dMetrics.Items() {
+		expectedMetrics := expectedState.Lacp[d.LagMemberPortName()]
+		if d.LagName() != expectedMetrics.Lag || d.Collecting() != expectedMetrics.Collecting || d.Distributing() != expectedMetrics.Distributing {
 			expected = false
 		}
 	}

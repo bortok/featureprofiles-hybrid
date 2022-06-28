@@ -276,12 +276,12 @@ func (tc *testCase) configureATE(t *testing.T) {
 		lagPort.SetPortName(port.Name()).
 			Ethernet().SetMac(helpers.IncrementedMac(ateDst.MAC, i)).
 			SetName("LagRx-" + strconv.Itoa(i))
-		if tc.lagType == lagTypeSTATIC {
-			lagId, _ := strconv.Atoi(tc.aggID)
-			lagPort.Protocol().SetChoice("static").Static().SetLagId(int32(lagId))
-		} else {
-			lagPort.Protocol().SetChoice("lacp")
-		}
+		// if tc.lagType == lagTypeSTATIC {
+		// 	lagId, _ := strconv.Atoi(tc.aggID)
+		// 	lagPort.Protocol().SetChoice("static").Static().SetLagId(int32(lagId))
+		// } else {
+		// 	lagPort.Protocol().SetChoice("lacp")
+		// }
 	}
 
 	dstDev := tc.top.Devices().Add().SetName(agg.Name())

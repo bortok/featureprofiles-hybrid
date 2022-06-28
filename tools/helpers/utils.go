@@ -38,12 +38,15 @@ type MetricsTableOpts struct {
 	Bgpv4Metrics   gosnappi.MetricsResponseBgpv4MetricIter
 	Bgpv6Metrics   gosnappi.MetricsResponseBgpv6MetricIter
 	IsisMetrics    gosnappi.MetricsResponseIsisMetricIter
+	LagMetrics     gosnappi.MetricsResponseLagMetricIter
+	LacpMetrics    gosnappi.MetricsResponseLacpLagMemberMetricIter
 }
 
 type StatesTableOpts struct {
 	ClearPrevious       bool
 	Ipv4NeighborsStates gosnappi.StatesResponseNeighborsv4StateIter
 	Ipv6NeighborsStates gosnappi.StatesResponseNeighborsv6StateIter
+	BgpPrefixes         gosnappi.StatesResponseBgpPrefixesStateIter
 }
 
 func Timer(start time.Time, name string) {
@@ -370,6 +373,76 @@ func PrintMetricsTable(opts *MetricsTableOpts) {
 		out += border + "\n\n"
 	}
 
+	if opts.LagMetrics != nil {
+		border := strings.Repeat("-", 20*3+5)
+		out += "\nLag Metrics\n" + border + "\n"
+		rowNames := []string{
+			"Name",
+			"Oper Status",
+			"Member Ports UP",
+		}
+
+		for _, rowName := range rowNames {
+			out += fmt.Sprintf("%-28s", rowName)
+			for _, d := range opts.LagMetrics.Items() {
+				if d != nil {
+					switch rowName {
+					case "Name":
+						out += fmt.Sprintf("%-25v", d.Name())
+					case "Oper Status":
+						out += fmt.Sprintf("%-25v", d.OperStatus())
+					case "Member Ports UP":
+						out += fmt.Sprintf("%-25v", d.MemberPortsUp())
+					}
+				}
+			}
+
+			out += "\n"
+
+		}
+		out += border + "\n\n"
+	}
+
+	if opts.LacpMetrics != nil {
+		border := strings.Repeat("-", 20*3+5)
+		out += "\nLacp Metrics\n" + border + "\n"
+		rowNames := []string{
+			"Lag",
+			"Member Port",
+			"Synchronization",
+			"Collecting",
+			"Distributing",
+			"System Id",
+			"Partner Id",
+		}
+
+		for _, rowName := range rowNames {
+			out += fmt.Sprintf("%-28s", rowName)
+			for _, d := range opts.LacpMetrics.Items() {
+				if d != nil {
+					switch rowName {
+					case "Lag":
+						out += fmt.Sprintf("%-25v", d.LagName())
+					case "Member Port":
+						out += fmt.Sprintf("%-25v", d.LagMemberPortName())
+					case "Synchronization":
+						out += fmt.Sprintf("%-25v", d.Synchronization())
+					case "Collecting":
+						out += fmt.Sprintf("%-25v", d.Collecting())
+					case "Distributing":
+						out += fmt.Sprintf("%-25v", d.Distributing())
+					case "System Id":
+						out += fmt.Sprintf("%-25v", d.SystemId())
+					case "Partner Id":
+						out += fmt.Sprintf("%-25v", d.PartnerId())
+					}
+				}
+			}
+			out += "\n"
+		}
+		out += border + "\n\n"
+	}
+
 	if opts.AllPortMetrics != nil {
 		border := strings.Repeat("-", 15*8-10)
 		out += "\nPort Metrics\n" + border + "\n"
@@ -514,6 +587,52 @@ func PrintStatesTable(opts *StatesTableOpts) {
 			}
 		}
 		out += border + "\n\n"
+	}
+
+	if opts.BgpPrefixes != nil {
+		border := strings.Repeat("-", 35*6+5)
+		for _, state := range opts.BgpPrefixes.Items() {
+			peerName := state.BgpPeerName()
+			out += "\nBGP Peer Name:" + peerName + "\n" + border + "\n"
+			if len(state.Ipv4UnicastPrefixes().Items()) != 0 {
+				out += "\nIPv4 Prefixes\n" + border + "\n"
+				out += fmt.Sprintf(
+					"%-25s%-25s%-25s%-25s%-25s%-25s\n",
+					"Address", "Prefix-Len", "Origin", "Path-Id", "NH-v4-Address", "NH-v6-Address",
+				)
+				for _, prefix := range state.Ipv4UnicastPrefixes().Items() {
+					out += fmt.Sprintf(
+						"%-25s%-25d%-25s%-25d%-25s%-25s\n",
+						prefix.Ipv4Address(),
+						prefix.PrefixLength(),
+						prefix.Origin(),
+						prefix.PathId(),
+						prefix.Ipv4NextHop(),
+						prefix.Ipv6NextHop(),
+					)
+				}
+				out += border + "\n\n"
+			}
+			if len(state.Ipv6UnicastPrefixes().Items()) != 0 {
+				out += "\nIPv6 Prefixes\n" + border + "\n"
+				out += fmt.Sprintf(
+					"%-25s%-25s%-25s%-25s%-25s%-25s\n",
+					"Address", "Prefix-Len", "Origin", "Path-Id", "NH-v4-Address", "NH-v6-Address",
+				)
+				for _, prefix := range state.Ipv6UnicastPrefixes().Items() {
+					out += fmt.Sprintf(
+						"%-25s%-25d%-25s%-25d%-25s%-25s\n",
+						prefix.Ipv6Address(),
+						prefix.PrefixLength(),
+						prefix.Origin(),
+						prefix.PathId(),
+						prefix.Ipv4NextHop(),
+						prefix.Ipv6NextHop(),
+					)
+				}
+				out += border + "\n\n"
+			}
+		}
 	}
 
 	if opts.ClearPrevious {
