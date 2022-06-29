@@ -16,6 +16,8 @@ package rt_5_2_aggregate_lacp
 
 import (
 	"fmt"
+	"log"
+	"strings"
 	"testing"
 
 	"github.com/open-traffic-generator/snappi/gosnappi"
@@ -59,20 +61,21 @@ func verifyPortStatus(t *testing.T, dut *ondatra.DUTDevice, interfaceName string
 	return true, nil
 }
 
-func getLacpMembersDetails(t *testing.T, dut *ondatra.DUTDevice, interfaceName string) map[string]ExpectedDUTLacpMember {
-	memberInterfaceMap := map[string]ExpectedDUTLacpMember{}
+func getLacpMembersDetails(t *testing.T, dut *ondatra.DUTDevice, interfaceName string) map[string]DUTLacpMember {
+	memberInterfaceMap := map[string]DUTLacpMember{}
 	members := dut.Telemetry().Lacp().Interface(interfaceName).MemberAny().Get(t)
 	for _, member := range members {
-		memberInterfaceMap[member.GetInterface()] = ExpectedDUTLacpMember{
+		memberInterfaceMap[member.GetInterface()] = DUTLacpMember{
 			Collecting:   member.GetCollecting(),
 			Distributing: member.GetDistributing(),
 		}
 	}
-	t.Logf("Bundled Ports for %s is : %v", interfaceName, memberInterfaceMap)
+	t.Logf("Port Channel: %s", interfaceName)
+	PrintDUTLacpMemberTable(memberInterfaceMap)
 	return memberInterfaceMap
 }
 
-type ExpectedDUTLacpMember struct {
+type DUTLacpMember struct {
 	Collecting   bool
 	Distributing bool
 }
@@ -97,7 +100,7 @@ func bundledPortsAsExpected(t *testing.T, dut *ondatra.DUTDevice, expectedBundle
 	return true, nil
 }
 
-func LacpMemberPortsAsExpected(t *testing.T, dut *ondatra.DUTDevice, ExpectedDUTLacpMember map[string]map[string]ExpectedDUTLacpMember) (bool, error) {
+func LacpMemberPortsAsExpected(t *testing.T, dut *ondatra.DUTDevice, ExpectedDUTLacpMember map[string]map[string]DUTLacpMember) (bool, error) {
 	for iFace, expectedLacpMembers := range ExpectedDUTLacpMember {
 		actualDUTLacpMembers := getLacpMembersDetails(t, dut, iFace)
 
@@ -111,6 +114,24 @@ func LacpMemberPortsAsExpected(t *testing.T, dut *ondatra.DUTDevice, ExpectedDUT
 		}
 	}
 	return true, nil
+}
+
+func PrintDUTLacpMemberTable(lacpMemberDetails map[string]DUTLacpMember) {
+	out := "\n"
+	border := strings.Repeat("-", 15*4+5)
+	out += "\nDUT LACP Member details\n" + border + "\n"
+	out += fmt.Sprintf(
+		"%-15s%-15s%-15s\n",
+		"Member Name", "Collecting", "Distributing",
+	)
+	for member, detail := range lacpMemberDetails {
+		out += fmt.Sprintf(
+			"%-15v%-15v%-15v\n",
+			member, detail.Collecting, detail.Distributing,
+		)
+	}
+	out += border + "\n\n"
+	log.Println(out)
 }
 
 func TestAggregateBGPTraffic(t *testing.T) {
@@ -135,7 +156,7 @@ func TestAggregateBGPTraffic(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	expectedLacpMemberPortsMap := map[string]map[string]ExpectedDUTLacpMember{
+	expectedLacpMemberPortsMap := map[string]map[string]DUTLacpMember{
 		"Port-Channel1": {
 			dut.Port(t, "port2").Name(): {Collecting: true, Distributing: true},
 			dut.Port(t, "port3").Name(): {Collecting: true, Distributing: true},
@@ -164,7 +185,7 @@ func TestAggregateBGPTraffic(t *testing.T) {
 
 	expectedMetrics := helpers.ExpectedState{
 		Lag: map[string]helpers.ExpectedLagMetrics{
-			"lag1": {Status: gosnappi.LagMetricOperStatus.DOWN, MemberPortsUp: 4},
+			"lag1": {Status: gosnappi.LagMetricOperStatus.UP, MemberPortsUp: 4},
 		},
 		Lacp: map[string]helpers.ExpectedLacpMetrics{
 			"port2": {
@@ -204,7 +225,7 @@ func TestAggregateBGPTraffic(t *testing.T) {
 	fmt.Println("Making Lag Member port2 down")
 	otg.DownLacpMember(t, []string{"port2"})
 
-	expectedLacpMemberPortsMap = map[string]map[string]ExpectedDUTLacpMember{
+	expectedLacpMemberPortsMap = map[string]map[string]DUTLacpMember{
 		"Port-Channel1": {
 			dut.Port(t, "port2").Name(): {Collecting: false, Distributing: false},
 			dut.Port(t, "port3").Name(): {Collecting: true, Distributing: true},
@@ -220,7 +241,7 @@ func TestAggregateBGPTraffic(t *testing.T) {
 
 	expectedMetrics = helpers.ExpectedState{
 		Lag: map[string]helpers.ExpectedLagMetrics{
-			"lag1": {Status: gosnappi.LagMetricOperStatus.DOWN, MemberPortsUp: 3},
+			"lag1": {Status: gosnappi.LagMetricOperStatus.UP, MemberPortsUp: 3},
 		},
 		Lacp: map[string]helpers.ExpectedLacpMetrics{
 			"port2": {
@@ -276,7 +297,7 @@ func TestAggregateBGPTraffic(t *testing.T) {
 	fmt.Println("Making Lag Member port3 down")
 	otg.DownLacpMember(t, []string{"port3"})
 
-	expectedLacpMemberPortsMap = map[string]map[string]ExpectedDUTLacpMember{
+	expectedLacpMemberPortsMap = map[string]map[string]DUTLacpMember{
 		"Port-Channel1": {
 			dut.Port(t, "port2").Name(): {Collecting: false, Distributing: false},
 			dut.Port(t, "port3").Name(): {Collecting: false, Distributing: false},
@@ -292,7 +313,7 @@ func TestAggregateBGPTraffic(t *testing.T) {
 
 	expectedMetrics = helpers.ExpectedState{
 		Lag: map[string]helpers.ExpectedLagMetrics{
-			"lag1": {Status: gosnappi.LagMetricOperStatus.DOWN, MemberPortsUp: 2},
+			"lag1": {Status: gosnappi.LagMetricOperStatus.UP, MemberPortsUp: 2},
 		},
 		Lacp: map[string]helpers.ExpectedLacpMetrics{
 			"port2": {
@@ -329,6 +350,7 @@ func TestAggregateBGPTraffic(t *testing.T) {
 	}
 
 	makeMemberPortDown(t, dut, "port3")
+
 	t.Logf("Check Interface status on DUT after 2 of 4 port links down (up links = min links)")
 	err = helpers.WaitFor(t, func() (bool, error) {
 		return verifyPortStatus(t, dut, "Port-Channel1", telemetry.Interface_OperStatus_UP)
@@ -346,11 +368,10 @@ func TestAggregateBGPTraffic(t *testing.T) {
 	// as up links < min links
 	fmt.Println("Making Lag Member port4 down ")
 	otg.DownLacpMember(t, []string{"port4"})
-	makeMemberPortDown(t, dut, "port4")
 
 	expectedMetrics = helpers.ExpectedState{
 		Lag: map[string]helpers.ExpectedLagMetrics{
-			"lag1": {Status: gosnappi.LagMetricOperStatus.UP, MemberPortsUp: 0},
+			"lag1": {Status: gosnappi.LagMetricOperStatus.DOWN, MemberPortsUp: 0},
 		},
 		Lacp: map[string]helpers.ExpectedLacpMetrics{
 			"port2": {
@@ -375,12 +396,15 @@ func TestAggregateBGPTraffic(t *testing.T) {
 			},
 		},
 	}
-	err = helpers.WaitFor(t, func() (bool, error) { return helpers.LagAsExpected(t, otg, config, expectedMetrics) }, nil)
+
+	err = helpers.WaitFor(t, func() (bool, error) { return helpers.LacpAsExpected(t, otg, config, expectedMetrics) }, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	err = helpers.WaitFor(t, func() (bool, error) { return helpers.LacpAsExpected(t, otg, config, expectedMetrics) }, nil)
+	makeMemberPortDown(t, dut, "port4")
+
+	err = helpers.WaitFor(t, func() (bool, error) { return helpers.LagAsExpected(t, otg, config, expectedMetrics) }, nil)
 	if err != nil {
 		t.Fatal(err)
 	}

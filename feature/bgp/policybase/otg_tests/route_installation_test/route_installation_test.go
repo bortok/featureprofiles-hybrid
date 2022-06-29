@@ -15,6 +15,7 @@
 package route_installation_test
 
 import (
+	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -56,7 +57,7 @@ func TestMain(m *testing.M) {
 // Similarly, Traffic is sent for IPv6 destinations.
 
 const (
-	trafficDuration        = 10 * time.Second
+	trafficDuration        = 5 * time.Second
 	trafficPacketRate      = 100
 	ipv4SrcTraffic         = "192.0.2.2"
 	ipv6SrcTraffic         = "2001:db8::192:0:2:2"
@@ -67,7 +68,7 @@ const (
 	advertisedRoutesv4CIDR = "203.0.113.1/32"
 	advertisedRoutesv6CIDR = "2001:db8::203:0:113:1/128"
 	peerGrpName            = "BGP-PEER-GROUP"
-	routeCount             = 254
+	routeCount             = 10
 	dutAS                  = 64500
 	ateAS                  = 64501
 	badAS                  = 64502
@@ -596,6 +597,7 @@ func TestEstablish(t *testing.T) {
 	t.Logf("Check BGP sessions on OTG")
 	helpers.WaitFor(t, func() (bool, error) { return helpers.AllBgp4SessionUp(t, otg, otgConfig, otgExpected) }, nil)
 	helpers.WaitFor(t, func() (bool, error) { return helpers.AllBgp6SessionUp(t, otg, otgConfig, otgExpected) }, nil)
+	helpers.GetBGPPrefix(t, otg, otgConfig)
 
 	// Starting ATE Traffic and verify Traffic Flows and packet loss
 	sendTraffic(t, otg, otgConfig)
@@ -681,6 +683,13 @@ func TestBGPPolicy(t *testing.T) {
 
 			helpers.WaitFor(t, func() (bool, error) { return helpers.AllBgp4SessionUp(t, otg, otgConfig, otgExpected) }, nil)
 			helpers.WaitFor(t, func() (bool, error) { return helpers.AllBgp6SessionUp(t, otg, otgConfig, otgExpected) }, nil)
+
+			afiSafiRoutes := dut.Telemetry().NetworkInstanceAny().Protocol(telemetry.PolicyTypes_INSTALL_PROTOCOL_TYPE_BGP, "BGP").Bgp().Rib().AfiSafiAny().Ipv4Unicast().Get(t)
+			for _, afiafiSafiRoute := range afiSafiRoutes {
+				fmt.Println(afiafiSafiRoute.GetLocRib().Route)
+			}
+
+			helpers.GetBGPPrefix(t, otg, otgConfig)
 			sendTraffic(t, otg, otgConfig)
 			verifyTraffic(t, ate, otgConfig, tc.wantLoss)
 
