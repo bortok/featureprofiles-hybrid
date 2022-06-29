@@ -15,7 +15,6 @@
 package route_installation_test
 
 import (
-	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -597,7 +596,28 @@ func TestEstablish(t *testing.T) {
 	t.Logf("Check BGP sessions on OTG")
 	helpers.WaitFor(t, func() (bool, error) { return helpers.AllBgp4SessionUp(t, otg, otgConfig, otgExpected) }, nil)
 	helpers.WaitFor(t, func() (bool, error) { return helpers.AllBgp6SessionUp(t, otg, otgConfig, otgExpected) }, nil)
-	helpers.GetBGPPrefix(t, otg, otgConfig)
+
+	expectedBGPPrefix :=
+		map[string]helpers.ExpectedBGPPrefixState{
+			ateSrc.Name + ".bgp4.peer": {
+				IPv4PrefixCount: 10,
+				IPv6PrefixCount: 0,
+			},
+			ateSrc.Name + ".bgp6.peer": {
+				IPv4PrefixCount: 0,
+				IPv6PrefixCount: 0,
+			},
+			ateDst.Name + ".bgp4.peer": {
+				IPv4PrefixCount: 0,
+				IPv6PrefixCount: 0,
+			},
+			ateDst.Name + ".bgp6.peer": {
+				IPv4PrefixCount: 0,
+				IPv6PrefixCount: 0,
+			},
+		}
+
+	helpers.BgpPrefixCountAsExpected(t, otg, otgConfig, expectedBGPPrefix)
 
 	// Starting ATE Traffic and verify Traffic Flows and packet loss
 	sendTraffic(t, otg, otgConfig)
@@ -633,6 +653,7 @@ func TestBGPPolicy(t *testing.T) {
 		policy                    string
 		installed, received, sent uint32
 		wantLoss                  bool
+		ExpectedBGPPrefix         map[string]helpers.ExpectedBGPPrefixState
 	}{{
 		desc:      "Configure Accept All Policy",
 		policy:    acceptPolicy,
@@ -640,6 +661,24 @@ func TestBGPPolicy(t *testing.T) {
 		received:  routeCount,
 		sent:      0,
 		wantLoss:  false,
+		ExpectedBGPPrefix: map[string]helpers.ExpectedBGPPrefixState{
+			ateSrc.Name + ".bgp4.peer": {
+				IPv4PrefixCount: 10,
+				IPv6PrefixCount: 0,
+			},
+			ateSrc.Name + ".bgp6.peer": {
+				IPv4PrefixCount: 0,
+				IPv6PrefixCount: 0,
+			},
+			ateDst.Name + ".bgp4.peer": {
+				IPv4PrefixCount: 0,
+				IPv6PrefixCount: 0,
+			},
+			ateDst.Name + ".bgp6.peer": {
+				IPv4PrefixCount: 0,
+				IPv6PrefixCount: 0,
+			},
+		},
 	}, {
 		desc:      "Configure Deny All Policy",
 		policy:    denyPolicy,
@@ -647,6 +686,24 @@ func TestBGPPolicy(t *testing.T) {
 		received:  routeCount,
 		sent:      0,
 		wantLoss:  true,
+		ExpectedBGPPrefix: map[string]helpers.ExpectedBGPPrefixState{
+			ateSrc.Name + ".bgp4.peer": {
+				IPv4PrefixCount: 0,
+				IPv6PrefixCount: 0,
+			},
+			ateSrc.Name + ".bgp6.peer": {
+				IPv4PrefixCount: 0,
+				IPv6PrefixCount: 0,
+			},
+			ateDst.Name + ".bgp4.peer": {
+				IPv4PrefixCount: 0,
+				IPv6PrefixCount: 0,
+			},
+			ateDst.Name + ".bgp6.peer": {
+				IPv4PrefixCount: 0,
+				IPv6PrefixCount: 0,
+			},
+		},
 	}, {
 		desc:      "Configure Set Local Preference Policy",
 		policy:    setLocalPrefPolicy,
@@ -654,6 +711,24 @@ func TestBGPPolicy(t *testing.T) {
 		received:  routeCount,
 		sent:      0,
 		wantLoss:  false,
+		ExpectedBGPPrefix: map[string]helpers.ExpectedBGPPrefixState{
+			ateSrc.Name + ".bgp4.peer": {
+				IPv4PrefixCount: 10,
+				IPv6PrefixCount: 0,
+			},
+			ateSrc.Name + ".bgp6.peer": {
+				IPv4PrefixCount: 0,
+				IPv6PrefixCount: 0,
+			},
+			ateDst.Name + ".bgp4.peer": {
+				IPv4PrefixCount: 0,
+				IPv6PrefixCount: 0,
+			},
+			ateDst.Name + ".bgp6.peer": {
+				IPv4PrefixCount: 0,
+				IPv6PrefixCount: 0,
+			},
+		},
 	}, {
 		desc:      "Configure Set AS Path prepend Policy",
 		policy:    setAspathPrependPolicy,
@@ -661,6 +736,24 @@ func TestBGPPolicy(t *testing.T) {
 		received:  routeCount,
 		sent:      0,
 		wantLoss:  false,
+		ExpectedBGPPrefix: map[string]helpers.ExpectedBGPPrefixState{
+			ateSrc.Name + ".bgp4.peer": {
+				IPv4PrefixCount: 10,
+				IPv6PrefixCount: 0,
+			},
+			ateSrc.Name + ".bgp6.peer": {
+				IPv4PrefixCount: 0,
+				IPv6PrefixCount: 0,
+			},
+			ateDst.Name + ".bgp4.peer": {
+				IPv4PrefixCount: 0,
+				IPv6PrefixCount: 0,
+			},
+			ateDst.Name + ".bgp6.peer": {
+				IPv4PrefixCount: 0,
+				IPv6PrefixCount: 0,
+			},
+		},
 	}}
 	for _, tc := range cases {
 		t.Run(tc.desc, func(t *testing.T) {
@@ -684,12 +777,8 @@ func TestBGPPolicy(t *testing.T) {
 			helpers.WaitFor(t, func() (bool, error) { return helpers.AllBgp4SessionUp(t, otg, otgConfig, otgExpected) }, nil)
 			helpers.WaitFor(t, func() (bool, error) { return helpers.AllBgp6SessionUp(t, otg, otgConfig, otgExpected) }, nil)
 
-			afiSafiRoutes := dut.Telemetry().NetworkInstanceAny().Protocol(telemetry.PolicyTypes_INSTALL_PROTOCOL_TYPE_BGP, "BGP").Bgp().Rib().AfiSafiAny().Ipv4Unicast().Get(t)
-			for _, afiafiSafiRoute := range afiSafiRoutes {
-				fmt.Println(afiafiSafiRoute.GetLocRib().Route)
-			}
+			helpers.BgpPrefixCountAsExpected(t, otg, otgConfig, tc.ExpectedBGPPrefix)
 
-			helpers.GetBGPPrefix(t, otg, otgConfig)
 			sendTraffic(t, otg, otgConfig)
 			verifyTraffic(t, ate, otgConfig, tc.wantLoss)
 

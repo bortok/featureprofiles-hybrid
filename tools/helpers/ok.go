@@ -50,6 +50,11 @@ type ExpectedState struct {
 	Lacp map[string]ExpectedLacpMetrics
 }
 
+type ExpectedBGPPrefixState struct {
+	IPv4PrefixCount int64
+	IPv6PrefixCount int64
+}
+
 func NewExpectedState() ExpectedState {
 	e := ExpectedState{
 		Port: map[string]ExpectedPortMetrics{},
@@ -59,6 +64,27 @@ func NewExpectedState() ExpectedState {
 		Isis: map[string]ExpectedIsisMetrics{},
 	}
 	return e
+}
+
+func BgpPrefixCountAsExpected(t *testing.T, otg *ondatra.OTG, c gosnappi.Config, expectedPrefixCount map[string]ExpectedBGPPrefixState) {
+	states, err := GetBGPPrefix(t, otg, c)
+	if err != nil {
+		t.Errorf("Failed to GetBGPPrefix: %v", err)
+	}
+	PrintStatesTable(&StatesTableOpts{
+		ClearPrevious: true,
+		BgpPrefixes:   states,
+	})
+
+	for _, s := range states.Items() {
+		expectedPrefixState := expectedPrefixCount[s.BgpPeerName()]
+		if len(s.Ipv4UnicastPrefixes().Items()) != int(expectedPrefixState.IPv4PrefixCount) {
+			t.Errorf("Peer %s, expected ipv4 prefix count: %d: fot %d", s.BgpPeerName(), int(expectedPrefixState.IPv4PrefixCount), len(s.Ipv4UnicastPrefixes().Items()))
+		}
+		if len(s.Ipv6UnicastPrefixes().Items()) != int(expectedPrefixState.IPv6PrefixCount) {
+			t.Errorf("Peer %s, expected ipv6 prefix count: %d: fot %d", s.BgpPeerName(), int(expectedPrefixState.IPv6PrefixCount), len(s.Ipv6UnicastPrefixes().Items()))
+		}
+	}
 }
 
 func Bgp4SessionAsExpected(t *testing.T, otg *ondatra.OTG, c gosnappi.Config, expectedState ExpectedState) (bool, error) {

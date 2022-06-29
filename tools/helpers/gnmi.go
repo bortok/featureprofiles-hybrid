@@ -249,21 +249,23 @@ func GetBGPPrefix(t *testing.T, otg *ondatra.OTG, c gosnappi.Config) (gosnappi.S
 					stateIpv4Prefix.Add().SetIpv4Address(ipv4Prefix.GetAddress()).
 						SetIpv4NextHop(ipv4Prefix.GetNextHopIpv4Address()).
 						SetIpv6NextHop(ipv4Prefix.GetNextHopIpv6Address()).
-						SetOrigin(gosnappi.BgpPrefixIpv4UnicastStateOriginEnum(ipv4Prefix.GetOrigin().String())).
+						SetOrigin(gosnappi.BgpPrefixIpv4UnicastStateOriginEnum(strings.ToLower(ipv4Prefix.GetOrigin().String()))).
 						SetPathId(int32(ipv4Prefix.GetPathId())).
 						SetPrefixLength(int32(ipv4Prefix.GetPrefixLength()))
 				}
 
-				ipv6Prefixes := otg.Telemetry().BgpPeer(peer.Name()).UnicastIpv6PrefixAny().Get(t)
-				stateIpv6Prefix := bgpv4PeerState.Ipv6UnicastPrefixes()
-				for _, ipv6Prefix := range ipv6Prefixes {
-					stateIpv6Prefix.Add().SetIpv6Address(ipv6Prefix.GetAddress()).
-						SetIpv4NextHop(ipv6Prefix.GetNextHopIpv4Address()).
-						SetIpv6NextHop(ipv6Prefix.GetNextHopIpv6Address()).
-						SetOrigin(gosnappi.BgpPrefixIpv6UnicastStateOriginEnum(ipv6Prefix.GetOrigin().String())).
-						SetPathId(int32(ipv6Prefix.GetPathId())).
-						SetPrefixLength(int32(ipv6Prefix.GetPrefixLength()))
-				}
+				// ipv6Prefixes := otg.Telemetry().BgpPeer(peer.Name()).UnicastIpv6PrefixAny().Get(t)
+				// stateIpv6Prefix := bgpv4PeerState.Ipv6UnicastPrefixes()
+				// fmt.Println(ipv6Prefixes)
+				// for _, ipv6Prefix := range ipv6Prefixes {
+				// 	fmt.Printf("%v", ipv6Prefix)
+				// 	stateIpv6Prefix.Add().SetIpv6Address(ipv6Prefix.GetAddress()).
+				// 		SetIpv4NextHop(ipv6Prefix.GetNextHopIpv4Address()).
+				// 		SetIpv6NextHop(ipv6Prefix.GetNextHopIpv6Address()).
+				// 		SetOrigin(gosnappi.BgpPrefixIpv6UnicastStateOriginEnum(strings.ToLower(ipv6Prefix.GetOrigin().String()))).
+				// 		SetPathId(int32(ipv6Prefix.GetPathId())).
+				// 		SetPrefixLength(int32(ipv6Prefix.GetPrefixLength()))
+				// }
 			}
 		}
 
@@ -278,29 +280,24 @@ func GetBGPPrefix(t *testing.T, otg *ondatra.OTG, c gosnappi.Config) (gosnappi.S
 					stateIpv4Prefix.Add().SetIpv4Address(ipv4Prefix.GetAddress()).
 						SetIpv4NextHop(ipv4Prefix.GetNextHopIpv4Address()).
 						SetIpv6NextHop(ipv4Prefix.GetNextHopIpv6Address()).
-						SetOrigin(gosnappi.BgpPrefixIpv4UnicastStateOriginEnum(ipv4Prefix.GetOrigin().String())).
+						SetOrigin(gosnappi.BgpPrefixIpv4UnicastStateOriginEnum(strings.ToLower(ipv4Prefix.GetOrigin().String()))).
 						SetPathId(int32(ipv4Prefix.GetPathId())).
 						SetPrefixLength(int32(ipv4Prefix.GetPrefixLength()))
 				}
 
-				ipv6Prefixes := otg.Telemetry().BgpPeer(peer.Name()).UnicastIpv6PrefixAny().Get(t)
-				stateIpv6Prefix := bgpv6PeerState.Ipv6UnicastPrefixes()
-				for _, ipv6Prefix := range ipv6Prefixes {
-					stateIpv6Prefix.Add().SetIpv6Address(ipv6Prefix.GetAddress()).
-						SetIpv4NextHop(ipv6Prefix.GetNextHopIpv4Address()).
-						SetIpv6NextHop(ipv6Prefix.GetNextHopIpv6Address()).
-						SetOrigin(gosnappi.BgpPrefixIpv6UnicastStateOriginEnum(ipv6Prefix.GetOrigin().String())).
-						SetPathId(int32(ipv6Prefix.GetPathId())).
-						SetPrefixLength(int32(ipv6Prefix.GetPrefixLength()))
-				}
+				// ipv6Prefixes := otg.Telemetry().BgpPeer(peer.Name()).UnicastIpv6PrefixAny().Get(t)
+				// stateIpv6Prefix := bgpv6PeerState.Ipv6UnicastPrefixes()
+				// for _, ipv6Prefix := range ipv6Prefixes {
+				// 	stateIpv6Prefix.Add().SetIpv6Address(ipv6Prefix.GetAddress()).
+				// 		SetIpv4NextHop(ipv6Prefix.GetNextHopIpv4Address()).
+				// 		SetIpv6NextHop(ipv6Prefix.GetNextHopIpv6Address()).
+				// 		SetOrigin(gosnappi.BgpPrefixIpv6UnicastStateOriginEnum(strings.ToLower(ipv6Prefix.GetOrigin().String()))).
+				// 		SetPathId(int32(ipv6Prefix.GetPathId())).
+				// 		SetPrefixLength(int32(ipv6Prefix.GetPrefixLength()))
+				// }
 			}
 		}
 	}
-
-	PrintStatesTable(&StatesTableOpts{
-		ClearPrevious: true,
-		BgpPrefixes:   states,
-	})
 	return states, nil
 }
 
