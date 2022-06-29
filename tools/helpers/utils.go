@@ -613,7 +613,7 @@ func PrintStatesTable(opts *StatesTableOpts) {
 				}
 				out += border + "\n\n"
 			} else {
-				out += "\nNo IPv6 Prefixes\n" + border + "\n"
+				out += "\nNo IPv4 Prefixes\n" + border + "\n"
 			}
 			if len(state.Ipv6UnicastPrefixes().Items()) != 0 {
 				out += "\nIPv6 Prefixes\n" + border + "\n"
