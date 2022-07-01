@@ -2,10 +2,12 @@ module github.com/openconfig/featureprofiles
 
 go 1.17
 
+replace github.com/openconfig/ondatra => github.com/open-traffic-generator/ondatra v0.0.0-20220629091225-11a5ab9d7bdd
+
 require (
 	github.com/golang/glog v1.0.0
 	github.com/google/go-cmp v0.5.8
-	github.com/open-traffic-generator/snappi/gosnappi v0.7.37
+	github.com/open-traffic-generator/snappi/gosnappi v0.8.2
 	github.com/openconfig/gnmi v0.0.0-20220131173555-39aa74195f0d
 	github.com/openconfig/gnoi v0.0.0-20220131192435-7dd3a95a4f1e
 	github.com/openconfig/gocloser v0.0.0-20220310182203-c6c950ed3b0b
@@ -18,14 +20,14 @@ require (
 	github.com/p4lang/p4runtime v1.3.0
 	github.com/protocolbuffers/txtpbfmt v0.0.0-20220131092820-39736dd543b4
 	golang.org/x/crypto v0.0.0-20220131195533-30dcbda58838
-	google.golang.org/grpc v1.46.2
+	google.golang.org/grpc v1.47.0
 	google.golang.org/protobuf v1.28.0
 )
 
 require (
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
-	github.com/google/kne v0.1.1-0.20220209214853-52a824020cd9 // indirect
+	github.com/google/kne v0.1.1-0.20220602171531-3e14252d2039 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect

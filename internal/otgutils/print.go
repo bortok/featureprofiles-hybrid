@@ -68,3 +68,69 @@ func LogPortMetrics(t testing.TB, otg *ondatra.OTG, c gosnappi.Config) {
 	out.WriteString("\n\n")
 	t.Log(out.String())
 }
+
+// LogLagMetrics is displaying otg lag stats.
+func LogLagMetrics(t testing.TB, otg *ondatra.OTG, c gosnappi.Config) {
+	t.Helper()
+	var out strings.Builder
+	out.WriteString("\nLag Metrics\n")
+	for i := 1; i <= 120; i++ {
+		out.WriteString("-")
+	}
+	out.WriteString("\n")
+	fmt.Fprintf(&out,
+		"%-25s%-15s%-15s\n",
+		"Name", "Oper Status", "Member Ports UP")
+	for _, lag := range c.Lags().Items() {
+		lagMetrics := otg.Telemetry().Lag(lag.Name()).Get(t)
+		operStatus := lagMetrics.GetOperStatus().String()
+		memberPortsUP := lagMetrics.GetCounters().GetMemberPortsUp()
+		out.WriteString(fmt.Sprintf(
+			"%-25v%-15v%-15v\n",
+			lag.Name(), operStatus, memberPortsUP,
+		))
+	}
+	fmt.Fprintln(&out, strings.Repeat("-", 120))
+	out.WriteString("\n\n")
+	t.Log(out.String())
+}
+
+// LogLacpMetrics is displaying otg lacp stats.
+func LogLacpMetrics(t testing.TB, otg *ondatra.OTG, c gosnappi.Config) {
+	t.Helper()
+	var out strings.Builder
+	out.WriteString("\nLacp Metrics\n")
+	for i := 1; i <= 120; i++ {
+		out.WriteString("-")
+	}
+	out.WriteString("\n")
+	fmt.Fprintf(&out,
+		"%-25s%-15s%-15s%-15s%-15s%-15s%-15s\n",
+		"Lag",
+		"Member Port",
+		"Synchronization",
+		"Collecting",
+		"Distributing",
+		"System Id",
+		"Partner Id")
+
+	for _, lag := range c.Lags().Items() {
+		lagPorts := lag.Ports().Items()
+		for _, lagPort := range lagPorts {
+			lacpMetric := otg.Telemetry().Lacp().LagMember(lagPort.PortName()).Get(t)
+			synchronization := lacpMetric.GetSynchronization().String()
+			collecting := lacpMetric.GetCollecting()
+			distributing := lacpMetric.GetDistributing()
+			systemId := lacpMetric.GetSystemId()
+			partnerId := lacpMetric.GetPartnerId()
+			out.WriteString(fmt.Sprintf(
+				"%-25v%-15v%-15v%-15v%-15v%-15v%-15v\n",
+				lag.Name(), lagPort.PortName(), synchronization, collecting, distributing, systemId, partnerId,
+			))
+
+		}
+	}
+	fmt.Fprintln(&out, strings.Repeat("-", 120))
+	out.WriteString("\n\n")
+	t.Log(out.String())
+}
