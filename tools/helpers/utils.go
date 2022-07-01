@@ -600,15 +600,25 @@ func PrintStatesTable(opts *StatesTableOpts) {
 					"%-25s%-25s%-25s%-25s%-25s%-25s\n",
 					"Address", "Prefix-Len", "Origin", "Path-Id", "NH-v4-Address", "NH-v6-Address",
 				)
+
 				for _, prefix := range state.Ipv4UnicastPrefixes().Items() {
+					address := prefix.Ipv4Address()
+					prefixLength := prefix.PrefixLength()
+					origin := prefix.Origin()
+					pathId := ""
+					if prefix.HasPathId() {
+						pathId = string(prefix.PathId())
+					}
+					ipv4NextHop := prefix.Ipv4NextHop()
+					ipv6NextHop := prefix.Ipv6NextHop()
 					out += fmt.Sprintf(
-						"%-25s%-25d%-25s%-25d%-25s%-25s\n",
-						prefix.Ipv4Address(),
-						prefix.PrefixLength(),
-						prefix.Origin(),
-						prefix.PathId(),
-						prefix.Ipv4NextHop(),
-						prefix.Ipv6NextHop(),
+						"%-25s%-25d%-25s%-25s%-25s%-25s\n",
+						address,
+						prefixLength,
+						origin,
+						pathId,
+						ipv4NextHop,
+						ipv6NextHop,
 					)
 				}
 				out += border + "\n\n"
@@ -622,14 +632,23 @@ func PrintStatesTable(opts *StatesTableOpts) {
 					"Address", "Prefix-Len", "Origin", "Path-Id", "NH-v4-Address", "NH-v6-Address",
 				)
 				for _, prefix := range state.Ipv6UnicastPrefixes().Items() {
+					address := prefix.Ipv6Address()
+					prefixLength := prefix.PrefixLength()
+					origin := prefix.Origin()
+					pathId := ""
+					if prefix.HasPathId() {
+						pathId = string(prefix.PathId())
+					}
+					ipv4NextHop := prefix.Ipv4NextHop()
+					ipv6NextHop := prefix.Ipv6NextHop()
 					out += fmt.Sprintf(
-						"%-25s%-25d%-25s%-25d%-25s%-25s\n",
-						prefix.Ipv6Address(),
-						prefix.PrefixLength(),
-						prefix.Origin(),
-						prefix.PathId(),
-						prefix.Ipv4NextHop(),
-						prefix.Ipv6NextHop(),
+						"%-25s%-25d%-25s%-25s%-25s%-25s\n",
+						address,
+						prefixLength,
+						origin,
+						pathId,
+						ipv4NextHop,
+						ipv6NextHop,
 					)
 				}
 				out += border + "\n\n"

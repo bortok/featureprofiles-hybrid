@@ -605,7 +605,7 @@ func TestEstablish(t *testing.T) {
 			},
 			ateSrc.Name + ".bgp6.peer": {
 				IPv4PrefixCount: 0,
-				IPv6PrefixCount: 0,
+				IPv6PrefixCount: 10,
 			},
 			ateDst.Name + ".bgp4.peer": {
 				IPv4PrefixCount: 0,
@@ -668,7 +668,7 @@ func TestBGPPolicy(t *testing.T) {
 			},
 			ateSrc.Name + ".bgp6.peer": {
 				IPv4PrefixCount: 0,
-				IPv6PrefixCount: 0,
+				IPv6PrefixCount: 10,
 			},
 			ateDst.Name + ".bgp4.peer": {
 				IPv4PrefixCount: 0,
@@ -718,7 +718,7 @@ func TestBGPPolicy(t *testing.T) {
 			},
 			ateSrc.Name + ".bgp6.peer": {
 				IPv4PrefixCount: 0,
-				IPv6PrefixCount: 0,
+				IPv6PrefixCount: 10,
 			},
 			ateDst.Name + ".bgp4.peer": {
 				IPv4PrefixCount: 0,
@@ -743,7 +743,7 @@ func TestBGPPolicy(t *testing.T) {
 			},
 			ateSrc.Name + ".bgp6.peer": {
 				IPv4PrefixCount: 0,
-				IPv6PrefixCount: 0,
+				IPv6PrefixCount: 10,
 			},
 			ateDst.Name + ".bgp4.peer": {
 				IPv4PrefixCount: 0,
