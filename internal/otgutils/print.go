@@ -105,7 +105,7 @@ func LogLacpMetrics(t testing.TB, otg *ondatra.OTG, c gosnappi.Config) {
 	}
 	out.WriteString("\n")
 	fmt.Fprintf(&out,
-		"%-25s%-15s%-15s%-15s%-15s%-15s%-15s\n",
+		"%-10s%-15s%-18s%-15s%-15s%-20s%-20s\n",
 		"Lag",
 		"Member Port",
 		"Synchronization",
@@ -124,7 +124,7 @@ func LogLacpMetrics(t testing.TB, otg *ondatra.OTG, c gosnappi.Config) {
 			systemId := lacpMetric.GetSystemId()
 			partnerId := lacpMetric.GetPartnerId()
 			out.WriteString(fmt.Sprintf(
-				"%-25v%-15v%-15v%-15v%-15v%-15v%-15v\n",
+				"%-10v%-15v%-18v%-15v%-15v%-20v%-20v\n",
 				lag.Name(), lagPort.PortName(), synchronization, collecting, distributing, systemId, partnerId,
 			))
 
