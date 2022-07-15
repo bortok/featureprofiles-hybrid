@@ -221,12 +221,12 @@ func TestAggregateLacpTraffic(t *testing.T) {
 	otgLacpAsExpected(t, otg, config, expectedOtgLacpMetrics)
 	otgutils.LogLacpMetrics(t, otg, config)
 
-	// expectedOtgLagMetrics := map[string]OtgLagMetric{
-	// 	"lag1": {Status: "UP", MemberPortsUp: 4},
-	// }
+	expectedOtgLagMetrics := map[string]OtgLagMetric{
+		"lag1": {Status: "UP", MemberPortsUp: 4},
+	}
 
 	t.Logf("Checking Lag metrics as expected on OTG")
-	// otgLagAsExpected(t, otg, config, expectedOtgLagMetrics)
+	otgLagAsExpected(t, otg, config, expectedOtgLagMetrics)
 	otgutils.LogLagMetrics(t, otg, config)
 
 	// as up links >  min links
@@ -245,12 +245,12 @@ func TestAggregateLacpTraffic(t *testing.T) {
 	t.Logf("Check Lacp Member status on DUT")
 	dutLacpMemberPortsAsExpected(t, dut, expectedLacpMemberPortsMap)
 
-	// expectedOtgLagMetrics = map[string]OtgLagMetric{
-	// 	"lag1": {Status: "UP", MemberPortsUp: 3},
-	// }
+	expectedOtgLagMetrics = map[string]OtgLagMetric{
+		"lag1": {Status: "UP", MemberPortsUp: 3},
+	}
 
 	t.Logf("Checking Lag metrics as expected on OTG")
-	// otgLagAsExpected(t, otg, config, expectedOtgLagMetrics)
+	otgLagAsExpected(t, otg, config, expectedOtgLagMetrics)
 	otgutils.LogLagMetrics(t, otg, config)
 
 	expectedOtgLacpMetrics = map[string]OtgLacpMetric{
@@ -299,12 +299,12 @@ func TestAggregateLacpTraffic(t *testing.T) {
 	t.Logf("Check Lacp Member status on DUT")
 	dutLacpMemberPortsAsExpected(t, dut, expectedLacpMemberPortsMap)
 
-	// expectedOtgLagMetrics = map[string]OtgLagMetric{
-	// 	"lag1": {Status: "UP", MemberPortsUp: 2},
-	// }
+	expectedOtgLagMetrics = map[string]OtgLagMetric{
+		"lag1": {Status: "UP", MemberPortsUp: 2},
+	}
 
 	t.Logf("Checking Lag metrics as expected on OTG")
-	// otgLagAsExpected(t, otg, config, expectedOtgLagMetrics)
+	otgLagAsExpected(t, otg, config, expectedOtgLagMetrics)
 	otgutils.LogLagMetrics(t, otg, config)
 
 	expectedOtgLacpMetrics = map[string]OtgLacpMetric{
@@ -373,19 +373,19 @@ func TestAggregateLacpTraffic(t *testing.T) {
 			dut.Port(t, "port2").Name(): {Synchronization: "OUT_SYNC", Collecting: false, Distributing: false},
 			dut.Port(t, "port3").Name(): {Synchronization: "OUT_SYNC", Collecting: false, Distributing: false},
 			dut.Port(t, "port4").Name(): {Synchronization: "OUT_SYNC", Collecting: false, Distributing: false},
-			dut.Port(t, "port5").Name(): {Synchronization: "OUT_SYNC", Collecting: false, Distributing: false},
+			dut.Port(t, "port5").Name(): {Synchronization: "IN_SYNC", Collecting: false, Distributing: false},
 		},
 	}
 
 	t.Logf("Check Lacp Member status on DUT")
 	dutLacpMemberPortsAsExpected(t, dut, expectedLacpMemberPortsMap)
 
-	// expectedOtgLagMetrics = map[string]OtgLagMetric{
-	// 	"lag1": {Status: "DOWN", MemberPortsUp: 0},
-	// }
+	expectedOtgLagMetrics = map[string]OtgLagMetric{
+		"lag1": {Status: "DOWN", MemberPortsUp: 0},
+	}
 
 	t.Logf("Checking Lag metrics as expected on OTG")
-	// otgLagAsExpected(t, otg, config, expectedOtgLagMetrics)
+	otgLagAsExpected(t, otg, config, expectedOtgLagMetrics)
 	otgutils.LogLagMetrics(t, otg, config)
 
 	t.Logf("Check Interface status on DUT after 3 of 4 port links down (up links < min links)")
