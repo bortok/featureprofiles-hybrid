@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package rt_5_2_aggregate_lacp
+package aggregate_lacp
 
 import (
 	"fmt"
@@ -23,6 +23,7 @@ import (
 	"github.com/openconfig/featureprofiles/internal/fptest"
 	"github.com/openconfig/featureprofiles/internal/otgutils"
 	"github.com/openconfig/ondatra"
+	"github.com/openconfig/ondatra/otg"
 	"github.com/openconfig/ondatra/telemetry"
 	otgtelemetry "github.com/openconfig/ondatra/telemetry/otg"
 )
@@ -110,7 +111,7 @@ func dutLacpMemberPortsAsExpected(t *testing.T, dut *ondatra.DUTDevice, Expected
 	return true, nil
 }
 
-func otgLagAsExpected(t *testing.T, otg *ondatra.OTG, config gosnappi.Config, expectedOtgLagMetrics map[string]OtgLagMetric) {
+func otgLagAsExpected(t *testing.T, otg *otg.OTG, config gosnappi.Config, expectedOtgLagMetrics map[string]OtgLagMetric) {
 	for lag, expOtgLagMetric := range expectedOtgLagMetrics {
 		lagPath := otg.Telemetry().Lag(lag)
 		_, ok := lagPath.OperStatus().Watch(t, time.Minute,
@@ -133,7 +134,7 @@ func otgLagAsExpected(t *testing.T, otg *ondatra.OTG, config gosnappi.Config, ex
 	}
 }
 
-func otgLacpAsExpected(t *testing.T, otg *ondatra.OTG, config gosnappi.Config, expectedOtgLacpMetrics map[string]OtgLacpMetric) {
+func otgLacpAsExpected(t *testing.T, otg *otg.OTG, config gosnappi.Config, expectedOtgLacpMetrics map[string]OtgLacpMetric) {
 	for lacpMemberPort, expOtgLacpMetric := range expectedOtgLacpMetrics {
 		lacpMemberPath := otg.Telemetry().Lacp().LagMember(lacpMemberPort)
 		_, ok := lacpMemberPath.Collecting().Watch(t, time.Minute,
@@ -393,7 +394,7 @@ func TestAggregateLacpTraffic(t *testing.T) {
 
 }
 
-func configureOTG(t *testing.T, otg *ondatra.OTG) gosnappi.Config {
+func configureOTG(t *testing.T, otg *otg.OTG) gosnappi.Config {
 	config := otg.NewConfig(t)
 	config.Ports().Add().SetName("port1")
 	port2 := config.Ports().Add().SetName("port2")

@@ -2,7 +2,7 @@ module github.com/openconfig/featureprofiles
 
 go 1.17
 
-replace github.com/openconfig/ondatra => github.com/open-traffic-generator/ondatra v0.0.0-20220629091225-11a5ab9d7bdd
+replace github.com/openconfig/ondatra => github.com/open-traffic-generator/ondatra v0.0.0-20220718074335-9cc6b7a0e38e
 
 require (
 	github.com/golang/glog v1.0.0
@@ -16,7 +16,7 @@ require (
 	github.com/openconfig/gribigo v0.0.0-20220525162038-a471e9b7c03e
 	github.com/openconfig/ondatra v0.0.0-20220615191542-92efb7f1a710
 	github.com/openconfig/testt v0.0.0-20220311054427-efbb1a32ec07
-	github.com/openconfig/ygot v0.22.1
+	github.com/openconfig/ygot v0.23.1
 	github.com/p4lang/p4runtime v1.3.0
 	github.com/protocolbuffers/txtpbfmt v0.0.0-20220131092820-39736dd543b4
 	golang.org/x/crypto v0.0.0-20220131195533-30dcbda58838
@@ -27,10 +27,10 @@ require (
 require (
 	github.com/ghodss/yaml v1.0.0 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
-	github.com/google/kne v0.1.1-0.20220602171531-3e14252d2039 // indirect
 	github.com/google/uuid v1.3.0 // indirect
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/mitchellh/go-wordwrap v1.0.1 // indirect
+	github.com/openconfig/kne v0.1.1 // indirect
 	github.com/patrickmn/go-cache v2.1.0+incompatible // indirect
 	github.com/pborman/uuid v1.2.1 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
