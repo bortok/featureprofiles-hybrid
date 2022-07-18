@@ -16,6 +16,7 @@ package rt_5_2_aggregate_lacp
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 	"time"
 
@@ -82,8 +83,40 @@ func dutVerifyInterfaceStatus(t *testing.T, dut *ondatra.DUTDevice, interfaceNam
 	}
 }
 
-func dutLacpMemberPortsAsExpected(t *testing.T, dut *ondatra.DUTDevice, ExpectedDUTLacpMember map[string]map[string]DUTLacpMember) (bool, error) {
-	for iFace, expectedLacpMembers := range ExpectedDUTLacpMember {
+func logDUTLacpMetrics(t testing.TB, dut *ondatra.DUTDevice, expectedDUTLacpMember map[string]map[string]DUTLacpMember) {
+	t.Helper()
+	var out strings.Builder
+	out.WriteString("\nDUT Lacp Metrics\n")
+	for i := 1; i <= 120; i++ {
+		out.WriteString("-")
+	}
+	out.WriteString("\n")
+	fmt.Fprintf(&out,
+		"%-20s%-20s%-15s%-15s%-15s\n",
+		"Port Channel",
+		"Member Interface",
+		"Synchronization",
+		"Collecting",
+		"Distributing",
+	)
+	for iFace, expectedLacpMembers := range expectedDUTLacpMember {
+		lacpInterfacePath := dut.Telemetry().Lacp().Interface(iFace)
+		for memberPort, _ := range expectedLacpMembers {
+			memberPortStat := lacpInterfacePath.Member(memberPort).Get(t)
+			out.WriteString(fmt.Sprintf(
+				"%-20v%-20v%-15v%-15v%-15v\n",
+				iFace, memberPort, memberPortStat.GetSynchronization().String(), memberPortStat.GetCollecting(), memberPortStat.GetDistributing(),
+			))
+
+		}
+	}
+	fmt.Fprintln(&out, strings.Repeat("-", 120))
+	out.WriteString("\n\n")
+	t.Log(out.String())
+}
+
+func dutLacpMemberPortsAsExpected(t *testing.T, dut *ondatra.DUTDevice, expectedDUTLacpMember map[string]map[string]DUTLacpMember) (bool, error) {
+	for iFace, expectedLacpMembers := range expectedDUTLacpMember {
 		lacpInterfacePath := dut.Telemetry().Lacp().Interface(iFace)
 		for memberPort, expectedInfo := range expectedLacpMembers {
 			memberPath := lacpInterfacePath.Member(memberPort)
@@ -92,9 +125,8 @@ func dutLacpMemberPortsAsExpected(t *testing.T, dut *ondatra.DUTDevice, Expected
 					return val.IsPresent() && val.Val(t) == expectedInfo.Collecting
 				}).Await(t)
 			if !ok {
+				logDUTLacpMetrics(t, dut, expectedDUTLacpMember)
 				t.Fatal(t, "Lacp Member Port ", memberPort, " Collecting is ", memberPath.Collecting().Get(t))
-			} else {
-				t.Logf("Collecting of Lacp Member Port %s is %v", memberPort, expectedInfo.Collecting)
 			}
 
 			_, ok = memberPath.Distributing().Watch(t, time.Minute,
@@ -102,9 +134,8 @@ func dutLacpMemberPortsAsExpected(t *testing.T, dut *ondatra.DUTDevice, Expected
 					return val.IsPresent() && val.Val(t) == expectedInfo.Distributing
 				}).Await(t)
 			if !ok {
+				logDUTLacpMetrics(t, dut, expectedDUTLacpMember)
 				t.Fatal(t, "Lacp Member Port ", memberPort, " Distributing is ", memberPath.Distributing().Get(t))
-			} else {
-				t.Logf("Distributing of Lacp Member Port %s is %v", memberPort, expectedInfo.Distributing)
 			}
 
 			_, ok = memberPath.Synchronization().Watch(t, time.Minute,
@@ -112,12 +143,12 @@ func dutLacpMemberPortsAsExpected(t *testing.T, dut *ondatra.DUTDevice, Expected
 					return val.IsPresent() && val.Val(t).String() == expectedInfo.Synchronization
 				}).Await(t)
 			if !ok {
+				logDUTLacpMetrics(t, dut, expectedDUTLacpMember)
 				t.Fatal(t, "Lacp Member Port ", memberPort, " Synchronization is ", memberPath.Synchronization().Get(t).String())
-			} else {
-				t.Logf("Synchronization of Lacp Member Port %s is %v", memberPort, expectedInfo.Synchronization)
 			}
 		}
 	}
+	logDUTLacpMetrics(t, dut, expectedDUTLacpMember)
 	return true, nil
 }
 
@@ -174,6 +205,48 @@ func otgLacpAsExpected(t *testing.T, otg *otg.OTG, config gosnappi.Config, expec
 			t.Fatal(t, "for Lacp Port ", lacpMemberPort, " Synchronization is: ", lacpMemberPath.Synchronization().Get(t).String())
 		}
 	}
+}
+
+func waitFor(fn func() bool, t testing.TB, interval time.Duration, timeout time.Duration) {
+	start := time.Now()
+	for {
+		done := fn()
+		t.Logf("%v", done)
+		if done {
+			t.Logf("Expected stats received...")
+			return
+		}
+		if time.Since(start) > timeout {
+			t.Logf("Timeout while waiting for expected stats...")
+			// t.Fatal("Timeout while waiting for expected stats...")
+			return
+		}
+		time.Sleep(interval)
+	}
+}
+
+func aggregateFlowMetricsAsExpected(t testing.TB, otg *otg.OTG, c gosnappi.Config, expectedPkts int) bool {
+	t.Helper()
+	var out strings.Builder
+	out.WriteString("\nFlow Metrics\n")
+	for i := 1; i <= 80; i++ {
+		out.WriteString("-")
+	}
+	out.WriteString("\n")
+	fmt.Fprintf(&out, "%-25v%-15v%-15v\n", "Name", "Frames Tx", "Frames Rx")
+	totalRxPkts := 0
+	totalTxPkts := 0
+	for _, f := range c.Flows().Items() {
+		expectedPkts += int(f.Duration().FixedPackets().Packets())
+		flowMetrics := otg.Telemetry().Flow(f.Name()).Get(t)
+		totalRxPkts = totalRxPkts + int(flowMetrics.GetCounters().GetInPkts())
+		totalTxPkts = totalTxPkts + int(flowMetrics.GetCounters().GetOutPkts())
+	}
+	out.WriteString(fmt.Sprintf("%-25v%-15v%-15v\n", "Aggregated Flow", totalTxPkts, totalRxPkts))
+	fmt.Fprintln(&out, strings.Repeat("-", 80))
+	out.WriteString("\n\n")
+	t.Log(out.String())
+	return totalRxPkts == expectedPkts
 }
 
 func TestAggregateLacpTraffic(t *testing.T) {
@@ -274,6 +347,20 @@ func TestAggregateLacpTraffic(t *testing.T) {
 	otgLagAsExpected(t, otg, config, expectedOtgLagMetrics)
 	otgutils.LogLagMetrics(t, otg, config)
 
+	t.Logf("Starting Traffic...")
+	otg.StartTraffic(t)
+
+	t.Logf("Waiting for flow metrics to be as expected...")
+	waitFor(
+		func() bool { return aggregateFlowMetricsAsExpected(t, otg, config, 80) },
+		t,
+		500*time.Millisecond,
+		3*time.Second,
+	)
+
+	t.Logf("Stopping Traffic...")
+	otg.StopTraffic(t)
+
 	// as up links >  min links
 	fmt.Println("Making Lag Member port2-4 down")
 	otg.DownLacpMember(t, []string{"port2", "port3", "port4"})
@@ -351,6 +438,20 @@ func TestAggregateLacpTraffic(t *testing.T) {
 	t.Logf("Checking Lacp metrics as expected on OTG")
 	otgLacpAsExpected(t, otg, config, expectedOtgLacpMetrics)
 	otgutils.LogLacpMetrics(t, otg, config)
+
+	t.Logf("Starting Traffic...")
+	otg.StartTraffic(t)
+
+	t.Logf("Waiting for flow metrics to be as expected...")
+	waitFor(
+		func() bool { return aggregateFlowMetricsAsExpected(t, otg, config, 80) },
+		t,
+		500*time.Millisecond,
+		3*time.Second,
+	)
+
+	t.Logf("Stopping Traffic...")
+	otg.StopTraffic(t)
 
 	// as up links =  min links
 	fmt.Println("Making Lag Member port5 down")
@@ -430,6 +531,20 @@ func TestAggregateLacpTraffic(t *testing.T) {
 	otgLacpAsExpected(t, otg, config, expectedOtgLacpMetrics)
 	otgutils.LogLacpMetrics(t, otg, config)
 
+	t.Logf("Starting Traffic...")
+	otg.StartTraffic(t)
+
+	t.Logf("Waiting for flow metrics to be as expected...")
+	waitFor(
+		func() bool { return aggregateFlowMetricsAsExpected(t, otg, config, 80) },
+		t,
+		500*time.Millisecond,
+		3*time.Second,
+	)
+
+	t.Logf("Stopping Traffic...")
+	otg.StopTraffic(t)
+
 	// as up links < min links
 	fmt.Println("Making Lag Member port6 down ")
 	otg.DownLacpMember(t, []string{"port6"})
@@ -507,6 +622,20 @@ func TestAggregateLacpTraffic(t *testing.T) {
 	t.Logf("Checking Lag metrics as expected on OTG")
 	otgLagAsExpected(t, otg, config, expectedOtgLagMetrics)
 	otgutils.LogLagMetrics(t, otg, config)
+
+	t.Logf("Starting Traffic...")
+	otg.StartTraffic(t)
+
+	t.Logf("Waiting for flow metrics to be as expected...")
+	waitFor(
+		func() bool { return aggregateFlowMetricsAsExpected(t, otg, config, 0) },
+		t,
+		500*time.Millisecond,
+		3*time.Second,
+	)
+
+	t.Logf("Stopping Traffic...")
+	otg.StopTraffic(t)
 
 }
 
@@ -703,7 +832,7 @@ func configureOTG(t *testing.T, otg *otg.OTG) gosnappi.Config {
 	flow4IP.Src().SetChoice("value").SetValue("11.1.1.2")
 
 	// flow port1 -> port6
-	flow5 := config.Flows().Add().SetName("port1->port5")
+	flow5 := config.Flows().Add().SetName("port1->port6")
 	flow5.Metrics().SetEnable(true)
 	flow5.TxRx().SetChoice("port").Port().SetTxName(port1.Name()).SetRxName(port6.Name())
 	flow5.Duration().SetChoice("fixed_packets").FixedPackets().SetPackets(10)

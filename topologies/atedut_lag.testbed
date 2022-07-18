@@ -16,6 +16,18 @@ duts {
   ports {
     id: "port5"    
   }
+   ports {
+    id: "port6"    
+  }
+   ports {
+    id: "port7"    
+  }
+   ports {
+    id: "port8"    
+  }
+   ports {
+    id: "port9"    
+  }
 }
 
 ates {
