@@ -92,7 +92,7 @@ func logDUTLacpMetrics(t testing.TB, dut *ondatra.DUTDevice, expectedDUTLacpMemb
 	}
 	out.WriteString("\n")
 	fmt.Fprintf(&out,
-		"%-20s%-20s%-15s%-15s%-15s\n",
+		"%-20s%-20s%-20s%-20s%-20s\n",
 		"Port Channel",
 		"Member Interface",
 		"Synchronization",
@@ -104,7 +104,7 @@ func logDUTLacpMetrics(t testing.TB, dut *ondatra.DUTDevice, expectedDUTLacpMemb
 		for memberPort, _ := range expectedLacpMembers {
 			memberPortStat := lacpInterfacePath.Member(memberPort).Get(t)
 			out.WriteString(fmt.Sprintf(
-				"%-20v%-20v%-15v%-15v%-15v\n",
+				"%-20v%-20v%-20v%-20v%-20v\n",
 				iFace, memberPort, memberPortStat.GetSynchronization().String(), memberPortStat.GetCollecting(), memberPortStat.GetDistributing(),
 			))
 
@@ -211,21 +211,20 @@ func waitFor(fn func() bool, t testing.TB, interval time.Duration, timeout time.
 	start := time.Now()
 	for {
 		done := fn()
-		t.Logf("%v", done)
 		if done {
 			t.Logf("Expected stats received...")
-			return
+			break
 		}
 		if time.Since(start) > timeout {
-			t.Logf("Timeout while waiting for expected stats...")
-			// t.Fatal("Timeout while waiting for expected stats...")
-			return
+			// t.Logf("Timeout while waiting for expected stats...")
+			t.Fatal("Timeout while waiting for expected stats...")
+			break
 		}
 		time.Sleep(interval)
 	}
 }
 
-func aggregateFlowMetricsAsExpected(t testing.TB, otg *otg.OTG, c gosnappi.Config, expectedPkts int) bool {
+func aggregateFlowMetricsAsExpected(t testing.TB, otg *otg.OTG, c gosnappi.Config, expectedRxPkts int) bool {
 	t.Helper()
 	var out strings.Builder
 	out.WriteString("\nFlow Metrics\n")
@@ -236,8 +235,9 @@ func aggregateFlowMetricsAsExpected(t testing.TB, otg *otg.OTG, c gosnappi.Confi
 	fmt.Fprintf(&out, "%-25v%-15v%-15v\n", "Name", "Frames Tx", "Frames Rx")
 	totalRxPkts := 0
 	totalTxPkts := 0
+	expectedTxPkts := 0
 	for _, f := range c.Flows().Items() {
-		expectedPkts += int(f.Duration().FixedPackets().Packets())
+		expectedTxPkts += int(f.Duration().FixedPackets().Packets())
 		flowMetrics := otg.Telemetry().Flow(f.Name()).Get(t)
 		totalRxPkts = totalRxPkts + int(flowMetrics.GetCounters().GetInPkts())
 		totalTxPkts = totalTxPkts + int(flowMetrics.GetCounters().GetOutPkts())
@@ -246,7 +246,7 @@ func aggregateFlowMetricsAsExpected(t testing.TB, otg *otg.OTG, c gosnappi.Confi
 	fmt.Fprintln(&out, strings.Repeat("-", 80))
 	out.WriteString("\n\n")
 	t.Log(out.String())
-	return totalRxPkts == expectedPkts
+	return totalRxPkts == expectedRxPkts && totalTxPkts == expectedTxPkts
 }
 
 func TestAggregateLacpTraffic(t *testing.T) {
@@ -352,7 +352,7 @@ func TestAggregateLacpTraffic(t *testing.T) {
 
 	t.Logf("Waiting for flow metrics to be as expected...")
 	waitFor(
-		func() bool { return aggregateFlowMetricsAsExpected(t, otg, config, 80) },
+		func() bool { return aggregateFlowMetricsAsExpected(t, otg, config, 400) },
 		t,
 		500*time.Millisecond,
 		3*time.Second,
@@ -444,7 +444,7 @@ func TestAggregateLacpTraffic(t *testing.T) {
 
 	t.Logf("Waiting for flow metrics to be as expected...")
 	waitFor(
-		func() bool { return aggregateFlowMetricsAsExpected(t, otg, config, 80) },
+		func() bool { return aggregateFlowMetricsAsExpected(t, otg, config, 400) },
 		t,
 		500*time.Millisecond,
 		3*time.Second,
@@ -536,7 +536,7 @@ func TestAggregateLacpTraffic(t *testing.T) {
 
 	t.Logf("Waiting for flow metrics to be as expected...")
 	waitFor(
-		func() bool { return aggregateFlowMetricsAsExpected(t, otg, config, 80) },
+		func() bool { return aggregateFlowMetricsAsExpected(t, otg, config, 400) },
 		t,
 		500*time.Millisecond,
 		3*time.Second,
@@ -779,9 +779,9 @@ func configureOTG(t *testing.T, otg *otg.OTG) gosnappi.Config {
 	flow1 := config.Flows().Add().SetName("port1->port2")
 	flow1.Metrics().SetEnable(true)
 	flow1.TxRx().SetChoice("port").Port().SetTxName(port1.Name()).SetRxName(port2.Name())
-	flow1.Duration().SetChoice("fixed_packets").FixedPackets().SetPackets(10)
+	flow1.Duration().SetChoice("fixed_packets").FixedPackets().SetPackets(50)
 	flow1.Size().SetChoice("fixed").SetFixed(128)
-	flow1.Rate().SetChoice("pps").SetPps(10)
+	flow1.Rate().SetChoice("pps").SetPps(50)
 	flow1Eth := flow1.Packet().Add().SetChoice("ethernet").Ethernet()
 	flow1Eth.Dst().SetChoice("value")
 	flow1Eth.Src().SetChoice("value").SetValue("00:00:01:01:01:01")
@@ -793,9 +793,9 @@ func configureOTG(t *testing.T, otg *otg.OTG) gosnappi.Config {
 	flow2 := config.Flows().Add().SetName("port1->port3")
 	flow2.Metrics().SetEnable(true)
 	flow2.TxRx().SetChoice("port").Port().SetTxName(port1.Name()).SetRxName(port3.Name())
-	flow2.Duration().SetChoice("fixed_packets").FixedPackets().SetPackets(10)
+	flow2.Duration().SetChoice("fixed_packets").FixedPackets().SetPackets(50)
 	flow2.Size().SetChoice("fixed").SetFixed(128)
-	flow2.Rate().SetChoice("pps").SetPps(10)
+	flow2.Rate().SetChoice("pps").SetPps(50)
 	flow2Eth := flow2.Packet().Add().SetChoice("ethernet").Ethernet()
 	flow2Eth.Dst().SetChoice("value")
 	flow2Eth.Src().SetChoice("value").SetValue("00:00:01:01:01:01")
@@ -807,9 +807,9 @@ func configureOTG(t *testing.T, otg *otg.OTG) gosnappi.Config {
 	flow3 := config.Flows().Add().SetName("port1->port4")
 	flow3.Metrics().SetEnable(true)
 	flow3.TxRx().SetChoice("port").Port().SetTxName(port1.Name()).SetRxName(port4.Name())
-	flow3.Duration().SetChoice("fixed_packets").FixedPackets().SetPackets(10)
+	flow3.Duration().SetChoice("fixed_packets").FixedPackets().SetPackets(50)
 	flow3.Size().SetChoice("fixed").SetFixed(128)
-	flow3.Rate().SetChoice("pps").SetPps(10)
+	flow3.Rate().SetChoice("pps").SetPps(50)
 	flow3Eth := flow3.Packet().Add().SetChoice("ethernet").Ethernet()
 	flow3Eth.Dst().SetChoice("value")
 	flow3Eth.Src().SetChoice("value").SetValue("00:00:01:01:01:01")
@@ -821,9 +821,9 @@ func configureOTG(t *testing.T, otg *otg.OTG) gosnappi.Config {
 	flow4 := config.Flows().Add().SetName("port1->port5")
 	flow4.Metrics().SetEnable(true)
 	flow4.TxRx().SetChoice("port").Port().SetTxName(port1.Name()).SetRxName(port5.Name())
-	flow4.Duration().SetChoice("fixed_packets").FixedPackets().SetPackets(10)
+	flow4.Duration().SetChoice("fixed_packets").FixedPackets().SetPackets(50)
 	flow4.Size().SetChoice("fixed").SetFixed(128)
-	flow4.Rate().SetChoice("pps").SetPps(10)
+	flow4.Rate().SetChoice("pps").SetPps(50)
 	flow4Eth := flow4.Packet().Add().SetChoice("ethernet").Ethernet()
 	flow4Eth.Dst().SetChoice("value")
 	flow4Eth.Src().SetChoice("value").SetValue("00:00:01:01:01:01")
@@ -835,9 +835,9 @@ func configureOTG(t *testing.T, otg *otg.OTG) gosnappi.Config {
 	flow5 := config.Flows().Add().SetName("port1->port6")
 	flow5.Metrics().SetEnable(true)
 	flow5.TxRx().SetChoice("port").Port().SetTxName(port1.Name()).SetRxName(port6.Name())
-	flow5.Duration().SetChoice("fixed_packets").FixedPackets().SetPackets(10)
+	flow5.Duration().SetChoice("fixed_packets").FixedPackets().SetPackets(50)
 	flow5.Size().SetChoice("fixed").SetFixed(128)
-	flow5.Rate().SetChoice("pps").SetPps(10)
+	flow5.Rate().SetChoice("pps").SetPps(50)
 	flow5Eth := flow5.Packet().Add().SetChoice("ethernet").Ethernet()
 	flow5Eth.Dst().SetChoice("value")
 	flow5Eth.Src().SetChoice("value").SetValue("00:00:01:01:01:01")
@@ -849,9 +849,9 @@ func configureOTG(t *testing.T, otg *otg.OTG) gosnappi.Config {
 	flow6 := config.Flows().Add().SetName("port1->port7")
 	flow6.Metrics().SetEnable(true)
 	flow6.TxRx().SetChoice("port").Port().SetTxName(port1.Name()).SetRxName(port7.Name())
-	flow6.Duration().SetChoice("fixed_packets").FixedPackets().SetPackets(10)
+	flow6.Duration().SetChoice("fixed_packets").FixedPackets().SetPackets(50)
 	flow6.Size().SetChoice("fixed").SetFixed(128)
-	flow6.Rate().SetChoice("pps").SetPps(10)
+	flow6.Rate().SetChoice("pps").SetPps(50)
 	flow6Eth := flow6.Packet().Add().SetChoice("ethernet").Ethernet()
 	flow6Eth.Dst().SetChoice("value")
 	flow6Eth.Src().SetChoice("value").SetValue("00:00:01:01:01:01")
@@ -863,9 +863,9 @@ func configureOTG(t *testing.T, otg *otg.OTG) gosnappi.Config {
 	flow7 := config.Flows().Add().SetName("port1->port8")
 	flow7.Metrics().SetEnable(true)
 	flow7.TxRx().SetChoice("port").Port().SetTxName(port1.Name()).SetRxName(port8.Name())
-	flow7.Duration().SetChoice("fixed_packets").FixedPackets().SetPackets(10)
+	flow7.Duration().SetChoice("fixed_packets").FixedPackets().SetPackets(50)
 	flow7.Size().SetChoice("fixed").SetFixed(128)
-	flow7.Rate().SetChoice("pps").SetPps(10)
+	flow7.Rate().SetChoice("pps").SetPps(50)
 	flow7Eth := flow7.Packet().Add().SetChoice("ethernet").Ethernet()
 	flow7Eth.Dst().SetChoice("value")
 	flow7Eth.Src().SetChoice("value").SetValue("00:00:01:01:01:01")
@@ -877,9 +877,9 @@ func configureOTG(t *testing.T, otg *otg.OTG) gosnappi.Config {
 	flow8 := config.Flows().Add().SetName("port1->port9")
 	flow8.Metrics().SetEnable(true)
 	flow8.TxRx().SetChoice("port").Port().SetTxName(port1.Name()).SetRxName(port9.Name())
-	flow8.Duration().SetChoice("fixed_packets").FixedPackets().SetPackets(10)
+	flow8.Duration().SetChoice("fixed_packets").FixedPackets().SetPackets(50)
 	flow8.Size().SetChoice("fixed").SetFixed(128)
-	flow8.Rate().SetChoice("pps").SetPps(10)
+	flow8.Rate().SetChoice("pps").SetPps(50)
 	flow8Eth := flow8.Packet().Add().SetChoice("ethernet").Ethernet()
 	flow8Eth.Dst().SetChoice("value")
 	flow8Eth.Src().SetChoice("value").SetValue("00:00:01:01:01:01")

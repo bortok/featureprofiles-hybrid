@@ -79,7 +79,7 @@ func LogLagMetrics(t testing.TB, otg *otg.OTG, c gosnappi.Config) {
 	}
 	out.WriteString("\n")
 	fmt.Fprintf(&out,
-		"%-25s%-15s%-15s%-20s%-20s\n",
+		"%-25s%-15s%-20s%-25s%-20s\n",
 		"Name", "Oper Status", "Member Ports UP", "Tx Frames", "Rx Frames")
 	for _, lag := range c.Lags().Items() {
 		lagMetrics := otg.Telemetry().Lag(lag.Name()).Get(t)
@@ -88,7 +88,7 @@ func LogLagMetrics(t testing.TB, otg *otg.OTG, c gosnappi.Config) {
 		framesTx := lagMetrics.GetCounters().GetOutFrames()
 		framesRx := lagMetrics.GetCounters().GetInFrames()
 		out.WriteString(fmt.Sprintf(
-			"%-25v%-15v%-15v%-20v%-20v\n",
+			"%-25v%-15v%-20v%-25v%-20v\n",
 			lag.Name(), operStatus, memberPortsUP, framesTx, framesRx,
 		))
 	}
