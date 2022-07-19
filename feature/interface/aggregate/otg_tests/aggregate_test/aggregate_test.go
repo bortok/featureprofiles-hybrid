@@ -636,7 +636,6 @@ func TestAggregateLacpTraffic(t *testing.T) {
 
 	t.Logf("Stopping Traffic...")
 	otg.StopTraffic(t)
-
 }
 
 func configureOTG(t *testing.T, otg *otg.OTG) gosnappi.Config {
