@@ -73,7 +73,7 @@ func LogPortMetrics(t testing.TB, otg *otg.OTG, c gosnappi.Config) {
 func LogLagMetrics(t testing.TB, otg *otg.OTG, c gosnappi.Config) {
 	t.Helper()
 	var out strings.Builder
-	out.WriteString("\nOTG Lag Metrics\n")
+	out.WriteString("\nOTG LAG Metrics\n")
 	for i := 1; i <= 120; i++ {
 		out.WriteString("-")
 	}
@@ -101,7 +101,7 @@ func LogLagMetrics(t testing.TB, otg *otg.OTG, c gosnappi.Config) {
 func LogLacpMetrics(t testing.TB, otg *otg.OTG, c gosnappi.Config) {
 	t.Helper()
 	var out strings.Builder
-	out.WriteString("\nOTG Lacp Metrics\n")
+	out.WriteString("\nOTG LACP Metrics\n")
 	for i := 1; i <= 120; i++ {
 		out.WriteString("-")
 	}
