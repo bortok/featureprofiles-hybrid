@@ -361,7 +361,7 @@ func TestAggregateLacpTraffic(t *testing.T) {
 	otg.StopTraffic(t)
 
 	// as up links >  min links
-	fmt.Println("Making Lag Member port2-4 down")
+	fmt.Println("Making LAG Member port2-4 down")
 	otg.DownLacpMember(t, []string{"port2", "port3", "port4"})
 
 	t.Logf("Check Interface status on DUT after bringing 3 of 8 port links down (up links > min links) ")
@@ -453,7 +453,7 @@ func TestAggregateLacpTraffic(t *testing.T) {
 	otg.StopTraffic(t)
 
 	// as up links =  min links
-	fmt.Println("Making Lag Member port5 down")
+	fmt.Println("Making LAG Member port5 down")
 	otg.DownLacpMember(t, []string{"port5"})
 
 	t.Logf("Check Interface status on DUT after 4 of 8 port links down (up links = min links)")

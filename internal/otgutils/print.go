@@ -108,7 +108,7 @@ func LogLacpMetrics(t testing.TB, otg *otg.OTG, c gosnappi.Config) {
 	out.WriteString("\n")
 	fmt.Fprintf(&out,
 		"%-10s%-15s%-18s%-15s%-15s%-20s%-20s\n",
-		"Lag",
+		"LAG",
 		"Member Port",
 		"Synchronization",
 		"Collecting",
