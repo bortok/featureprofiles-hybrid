@@ -2,7 +2,7 @@ module github.com/openconfig/featureprofiles
 
 go 1.17
 
-replace github.com/openconfig/ondatra => github.com/open-traffic-generator/ondatra v0.0.0-20220718074335-9cc6b7a0e38e
+replace github.com/openconfig/ondatra => github.com/open-traffic-generator/ondatra v0.0.0-20220729043750-c204afb76ffc
 
 require (
 	github.com/golang/glog v1.0.0

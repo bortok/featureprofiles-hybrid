@@ -136,3 +136,86 @@ func LogLacpMetrics(t testing.TB, otg *otg.OTG, c gosnappi.Config) {
 	out.WriteString("\n\n")
 	t.Log(out.String())
 }
+
+// LogBGPv4Metrics is displaying otg BGPv4 stats.
+func LogBGPv4Metrics(t testing.TB, otg *otg.OTG, c gosnappi.Config) {
+	t.Helper()
+	var out strings.Builder
+	out.WriteString("\nOTG BGPv4 Metrics\n")
+	for i := 1; i <= 130; i++ {
+		out.WriteString("-")
+	}
+	out.WriteString("\n")
+	fmt.Fprintf(&out,
+		"%-15s%-15s%-15s%-15s%-15s%-18s%-18s%-18s%-15s\n",
+		"Name",
+		"State",
+		"Flaps",
+		"Routes TX",
+		"Routes RX",
+		"Route Withdraws Tx",
+		"Route Withdraws Rx",
+		"Keepalives Tx",
+		"Keepalives Rx",
+	)
+
+	for _, d := range c.Devices().Items() {
+		for _, ip := range d.Bgp().Ipv4Interfaces().Items() {
+			for _, peer := range ip.Peers().Items() {
+				bgpv4Metric := otg.Telemetry().BgpPeer(peer.Name()).Get(t)
+				name := bgpv4Metric.GetName()
+				state := bgpv4Metric.GetSessionState().String()
+				flaps := bgpv4Metric.GetCounters().GetFlaps()
+				routesTx := bgpv4Metric.GetCounters().GetOutRoutes()
+				routesRx := bgpv4Metric.GetCounters().GetInRoutes()
+				routesWithdrawTx := bgpv4Metric.GetCounters().GetOutRouteWithdraw()
+				routesWithdrawRx := bgpv4Metric.GetCounters().GetInRouteWithdraw()
+				keepalivesTx := bgpv4Metric.GetCounters().GetOutKeepalives()
+				keepalivesRx := bgpv4Metric.GetCounters().GetInKeepalives()
+				out.WriteString(fmt.Sprintf(
+					"%-15v%-15v%-15v%-15v%-15v%-18v%-18v%-18v%-15v\n",
+					name, state, flaps, routesTx, routesRx, routesWithdrawTx, routesWithdrawRx, keepalivesTx, keepalivesRx,
+				))
+
+			}
+		}
+	}
+	fmt.Fprintln(&out, strings.Repeat("-", 130))
+	out.WriteString("\n\n")
+	t.Log(out.String())
+}
+
+// LogISISMetrics is displaying otg ISIS stats.
+func LogISISMetrics(t testing.TB, otg *otg.OTG, c gosnappi.Config) {
+	t.Helper()
+	var out strings.Builder
+	out.WriteString("\nOTG ISIS Metrics\n")
+	for i := 1; i <= 120; i++ {
+		out.WriteString("-")
+	}
+	out.WriteString("\n")
+	fmt.Fprintf(&out,
+		"%-15s%-15s%-15s%-15s%-15s\n",
+		"Name",
+		"L1 Ups",
+		"L1 Flaps",
+		"L2 Ups",
+		"L2 Flaps",
+	)
+
+	for _, d := range c.Devices().Items() {
+		isisMetric := otg.Telemetry().IsisRouter(d.Isis().Name()).Get(t)
+		name := isisMetric.GetName()
+		l1Ups := isisMetric.GetCounters().GetLevel1().GetSessionsUp()
+		l1Flaps := isisMetric.GetCounters().GetLevel1().GetSessionsFlap()
+		l2Ups := isisMetric.GetCounters().GetLevel2().GetSessionsUp()
+		l2Flaps := isisMetric.GetCounters().GetLevel2().GetSessionsFlap()
+		out.WriteString(fmt.Sprintf(
+			"%-15v%-15v%-15v%-15v%-15v\n",
+			name, l1Ups, l1Flaps, l2Ups, l2Flaps,
+		))
+	}
+	fmt.Fprintln(&out, strings.Repeat("-", 130))
+	out.WriteString("\n\n")
+	t.Log(out.String())
+}

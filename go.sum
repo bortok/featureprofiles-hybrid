@@ -559,9 +559,8 @@ github.com/onsi/gomega v1.10.2/go.mod h1:iN09h71vgCQne3DLsj+A5owkum+a2tYe+TOCB1y
 github.com/onsi/gomega v1.10.3/go.mod h1:V9xEwhxec5O8UDM77eCW8vLymOMltsqPVYWrpDsH8xc=
 github.com/onsi/gomega v1.13.0/go.mod h1:lRk9szgn8TxENtWd0Tp4c3wjlRfMTMH27I+3Je41yGY=
 github.com/open-traffic-generator/ixia-c-operator v0.1.89/go.mod h1:qHIu+7E0sxr7tAa42qJPyrYvhYAKSMerS8NrDo2OZb8=
-github.com/open-traffic-generator/ondatra v0.0.0-20220718074335-9cc6b7a0e38e h1:ipBYuxMgNlfRKPWRZ0/pGa/7A14KA0PPdqdIDoJzdFo=
-github.com/open-traffic-generator/ondatra v0.0.0-20220718074335-9cc6b7a0e38e/go.mod h1:GF/Iy4L3oideBZBEKArhGHZ+mxYjvjbwc0GymkGRE5w=
-github.com/open-traffic-generator/snappi/gosnappi v0.8.2/go.mod h1:JUW9/UK/zLqqhGvYJB6Moj+9E/CLPxaLO38Jj8yR+Vs=
+github.com/open-traffic-generator/ondatra v0.0.0-20220729043750-c204afb76ffc h1:CAE+6Mw8gvAD0v4O/w8ldpregiaLJgGRUTby5c8u4dg=
+github.com/open-traffic-generator/ondatra v0.0.0-20220729043750-c204afb76ffc/go.mod h1:AwgFOiKxWA51hpjZk5BKkcTcassVHgmDvXsO4Uyuey0=
 github.com/open-traffic-generator/snappi/gosnappi v0.8.5 h1:UIA4EpMwvDJYZ4htsnwUU+JB83GRZXrexSv9+S9KZh8=
 github.com/open-traffic-generator/snappi/gosnappi v0.8.5/go.mod h1:8teR2eonSEJTr/Y1B125KN23RTmGh6ybgURTt28IlI0=
 github.com/openconfig/gnmi v0.0.0-20200414194230-1597cc0f2600/go.mod h1:M/EcuapNQgvzxo1DDXHK4tx3QpYM/uG4l591v33jG2A=
@@ -737,7 +736,6 @@ github.com/stretchr/testify v1.5.1/go.mod h1:5W2xD1RspED5o8YsWQXVCued0rvSQ+mT+I5
 github.com/stretchr/testify v1.6.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.7.0/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
 github.com/stretchr/testify v1.7.1/go.mod h1:6Fq8oRcR53rry900zMqJjRRixrwX3KX962/h/Wwjteg=
-github.com/stretchr/testify v1.7.4/go.mod h1:yNjHg4UonilssWZ8iaSj1OCr/vHnekPRkoO+kdMU+MU=
 github.com/stretchr/testify v1.8.0 h1:pSgiaMZlXftHpm5L7V1+rVB+AZJydKsMxsQBIJw4PKk=
 github.com/stretchr/testify v1.8.0/go.mod h1:yNjHg4UonilssWZ8iaSj1OCr/vHnekPRkoO+kdMU+MU=
 github.com/subosito/gotenv v1.2.0/go.mod h1:N0PQaV/YGNqwC0u51sEeR/aUtSLEXKX9iv69rRypqCw=
@@ -1149,7 +1147,6 @@ google.golang.org/grpc v1.37.0/go.mod h1:NREThFqKR1f3iQ6oBuvc5LadQuXVGo9rkm5ZGrQ
 google.golang.org/grpc v1.40.0/go.mod h1:ogyxbiOoUXAkP+4+xa6PZSE9DZgIHtSpzjDTB9KAK34=
 google.golang.org/grpc v1.42.0/go.mod h1:k+4IHHFw41K8+bbowsex27ge2rCb65oeWqe4jJ590SU=
 google.golang.org/grpc v1.45.0/go.mod h1:lN7owxKUQEqMfSyQikvvk5tf/6zMPsrK+ONuO11+0rQ=
-google.golang.org/grpc v1.47.0/go.mod h1:vN9eftEi1UMyUsIF80+uQXhHjbXYbm0uXoFCACuMGWk=
 google.golang.org/grpc v1.48.0 h1:rQOsyJ/8+ufEDJd/Gdsz7HG220Mh9HAhFHRGnIjda0w=
 google.golang.org/grpc v1.48.0/go.mod h1:vN9eftEi1UMyUsIF80+uQXhHjbXYbm0uXoFCACuMGWk=
 google.golang.org/grpc/cmd/protoc-gen-go-grpc v1.0.1/go.mod h1:6Kw0yEErY5E/yWrBtf03jp27GLLJujG4z/JK95pnjjw=
