@@ -334,22 +334,22 @@ func TestAggregateLacpProtocol(t *testing.T) {
 	otgLagAsExpected(t, otg, config, expectedOtgLagMetrics)
 	otgutils.LogLagMetrics(t, otg, config)
 
-	// expectedBGPMetric := map[string]OTGBGPMetric{
-	// 	"p1d1.bgp1":   {State: "ESTABLISHED"},
-	// 	"lag1d1.bgp1": {State: "ESTABLISHED"},
-	// }
-	// t.Logf("Checking BGP metrics as expected on OTG")
-	// verifyOTGBGPTelemetry(t, otg, config, expectedBGPMetric)
-	// otgutils.LogBGPv4Metrics(t, otg, config)
+	expectedBGPMetric := map[string]OTGBGPMetric{
+		"p1d1.bgp1":   {State: "ESTABLISHED"},
+		"lag1d1.bgp1": {State: "ESTABLISHED"},
+	}
+	t.Logf("Checking BGP metrics as expected on OTG")
+	verifyOTGBGPTelemetry(t, otg, config, expectedBGPMetric)
+	otgutils.LogBGPv4Metrics(t, otg, config)
 
 	expectedIsIsMetric := map[string]OTGIsIsMetric{
 		"p1d1.isis1": {
-			L1Ups: 0,
-			L2Ups: 1,
+			L1Ups: 1,
+			L2Ups: 0,
 		},
 		"lag1d1.isis1": {
-			L1Ups: 0,
-			L2Ups: 1,
+			L1Ups: 1,
+			L2Ups: 0,
 		},
 	}
 	t.Logf("Checking ISIS metrics as expected on OTG")
@@ -434,22 +434,26 @@ func TestAggregateLacpProtocol(t *testing.T) {
 	otgLacpAsExpected(t, otg, config, expectedOtgLacpMetrics)
 	otgutils.LogLacpMetrics(t, otg, config)
 
-	// expectedBGPMetric = map[string]OTGBGPMetric{
-	// 	"p1d1.bgp1":   {State: "ESTABLISHED"},
-	// 	"lag1d1.bgp1": {State: "ESTABLISHED"},
-	// }
-	// t.Logf("Checking BGP metrics as expected on OTG")
-	// verifyOTGBGPTelemetry(t, otg, config, expectedBGPMetric)
-	// otgutils.LogBGPv4Metrics(t, otg, config)
+	bgpHoldTime := config.Devices().Items()[1].Bgp().Ipv4Interfaces().Items()[0].Peers().Items()[0].Advanced().HoldTimeInterval() + 5
+	t.Logf("Waiting for BGP hold interval to over...")
+	time.Sleep(time.Duration(bgpHoldTime) * time.Second)
+
+	expectedBGPMetric = map[string]OTGBGPMetric{
+		"p1d1.bgp1":   {State: "ESTABLISHED"},
+		"lag1d1.bgp1": {State: "ESTABLISHED"},
+	}
+	t.Logf("Checking BGP metrics as expected on OTG")
+	verifyOTGBGPTelemetry(t, otg, config, expectedBGPMetric)
+	otgutils.LogBGPv4Metrics(t, otg, config)
 
 	expectedIsIsMetric = map[string]OTGIsIsMetric{
 		"p1d1.isis1": {
-			L1Ups: 0,
-			L2Ups: 1,
+			L1Ups: 1,
+			L2Ups: 0,
 		},
 		"lag1d1.isis1": {
-			L1Ups: 0,
-			L2Ups: 1,
+			L1Ups: 1,
+			L2Ups: 0,
 		},
 	}
 	t.Logf("Checking ISIS metrics as expected on OTG")
@@ -534,22 +538,24 @@ func TestAggregateLacpProtocol(t *testing.T) {
 	otgLacpAsExpected(t, otg, config, expectedOtgLacpMetrics)
 	otgutils.LogLacpMetrics(t, otg, config)
 
-	// expectedBGPMetric = map[string]OTGBGPMetric{
-	// 	"p1d1.bgp1":   {State: "ESTABLISHED"},
-	// 	"lag1d1.bgp1": {State: "ESTABLISHED"},
-	// }
-	// t.Logf("Checking BGP metrics as expected on OTG")
-	// verifyOTGBGPTelemetry(t, otg, config, expectedBGPMetric)
-	// otgutils.LogBGPv4Metrics(t, otg, config)
+	t.Logf("Waiting for BGP hold interval to over...")
+	time.Sleep(time.Duration(bgpHoldTime) * time.Second)
+	expectedBGPMetric = map[string]OTGBGPMetric{
+		"p1d1.bgp1":   {State: "ESTABLISHED"},
+		"lag1d1.bgp1": {State: "ESTABLISHED"},
+	}
+	t.Logf("Checking BGP metrics as expected on OTG")
+	verifyOTGBGPTelemetry(t, otg, config, expectedBGPMetric)
+	otgutils.LogBGPv4Metrics(t, otg, config)
 
 	expectedIsIsMetric = map[string]OTGIsIsMetric{
 		"p1d1.isis1": {
-			L1Ups: 0,
-			L2Ups: 1,
+			L1Ups: 1,
+			L2Ups: 0,
 		},
 		"lag1d1.isis1": {
-			L1Ups: 0,
-			L2Ups: 1,
+			L1Ups: 1,
+			L2Ups: 0,
 		},
 	}
 	t.Logf("Checking ISIS metrics as expected on OTG")
@@ -634,21 +640,124 @@ func TestAggregateLacpProtocol(t *testing.T) {
 	t.Logf("Check LACP Member status on DUT")
 	dutLacpMemberPortsAsExpected(t, dut, expectedLacpMemberPortsMap)
 
-	// expectedBGPMetric = map[string]OTGBGPMetric{
-	// 	"p1d1.bgp1":   {State: "ESTABLISHED"},
-	// 	"lag1d1.bgp1": {State: "IDLE"},
-	// }
-	// t.Logf("Checking BGP metrics as expected on OTG")
-	// verifyOTGBGPTelemetry(t, otg, config, expectedBGPMetric)
-	// otgutils.LogBGPv4Metrics(t, otg, config)
+	expectedBGPMetric = map[string]OTGBGPMetric{
+		"p1d1.bgp1":   {State: "ESTABLISHED"},
+		"lag1d1.bgp1": {State: "IDLE"},
+	}
+	t.Logf("Checking BGP metrics as expected on OTG")
+	verifyOTGBGPTelemetry(t, otg, config, expectedBGPMetric)
+	otgutils.LogBGPv4Metrics(t, otg, config)
 
 	expectedIsIsMetric = map[string]OTGIsIsMetric{
 		"p1d1.isis1": {
-			L1Ups: 0,
+			L1Ups: 1,
 			L2Ups: 0,
 		},
 		"lag1d1.isis1": {
 			L1Ups: 0,
+			L2Ups: 0,
+		},
+	}
+	t.Logf("Checking ISIS metrics as expected on OTG")
+	verifyOTGIsIsTelemetry(t, otg, config, expectedIsIsMetric)
+	otgutils.LogISISMetrics(t, otg, config)
+
+	// as up links = min links
+	fmt.Println("Making LAG Member port6 up ")
+	otg.UpLacpMember(t, []string{"port6"})
+
+	t.Logf("Check Interface status on DUT after 4 of 8 port links down (up links = min links)")
+	dutVerifyInterfaceStatus(t, dut, "Port-Channel1", "UP")
+
+	expectedOtgLacpMetrics = map[string]OtgLacpMetric{
+		"port2": {
+			Synchronization: "OUT_SYNC",
+			Collecting:      false,
+			Distributing:    false,
+		},
+		"port3": {
+			Synchronization: "OUT_SYNC",
+			Collecting:      false,
+			Distributing:    false,
+		},
+		"port4": {
+			Synchronization: "OUT_SYNC",
+			Collecting:      false,
+			Distributing:    false,
+		},
+		"port5": {
+			Synchronization: "OUT_SYNC",
+			Collecting:      false,
+			Distributing:    false,
+		},
+		"port6": {
+			Synchronization: "IN_SYNC",
+			Collecting:      true,
+			Distributing:    true,
+		},
+		"port7": {
+			Synchronization: "IN_SYNC",
+			Collecting:      true,
+			Distributing:    true,
+		},
+		"port8": {
+			Synchronization: "IN_SYNC",
+			Collecting:      true,
+			Distributing:    true,
+		},
+		"port9": {
+			Synchronization: "IN_SYNC",
+			Collecting:      true,
+			Distributing:    true,
+		},
+	}
+
+	t.Logf("Checking LACP metrics as expected on OTG")
+	otgLacpAsExpected(t, otg, config, expectedOtgLacpMetrics)
+	otgutils.LogLacpMetrics(t, otg, config)
+
+	expectedOtgLagMetrics = map[string]OtgLagMetric{
+		"lag1": {Status: "UP", MemberPortsUp: 4},
+	}
+
+	t.Logf("Checking LAG metrics as expected on OTG")
+	otgLagAsExpected(t, otg, config, expectedOtgLagMetrics)
+	otgutils.LogLagMetrics(t, otg, config)
+
+	expectedLacpMemberPortsMap = map[string]map[string]DUTLacpMember{
+		"Port-Channel1": {
+			dut.Port(t, "port2").Name(): {Synchronization: "IN_SYNC", Collecting: false, Distributing: false},
+			dut.Port(t, "port3").Name(): {Synchronization: "IN_SYNC", Collecting: false, Distributing: false},
+			dut.Port(t, "port4").Name(): {Synchronization: "IN_SYNC", Collecting: false, Distributing: false},
+			dut.Port(t, "port5").Name(): {Synchronization: "IN_SYNC", Collecting: false, Distributing: false},
+			dut.Port(t, "port6").Name(): {Synchronization: "IN_SYNC", Collecting: true, Distributing: true},
+			dut.Port(t, "port7").Name(): {Synchronization: "IN_SYNC", Collecting: true, Distributing: true},
+			dut.Port(t, "port8").Name(): {Synchronization: "IN_SYNC", Collecting: true, Distributing: true},
+			dut.Port(t, "port9").Name(): {Synchronization: "IN_SYNC", Collecting: true, Distributing: true},
+		},
+	}
+
+	t.Logf("Check LACP Member status on DUT")
+	dutLacpMemberPortsAsExpected(t, dut, expectedLacpMemberPortsMap)
+
+	t.Logf("Waiting for BGP hold interval to over...")
+	time.Sleep(time.Duration(bgpHoldTime) * time.Second)
+
+	expectedBGPMetric = map[string]OTGBGPMetric{
+		"p1d1.bgp1":   {State: "ESTABLISHED"},
+		"lag1d1.bgp1": {State: "ESTABLISHED"},
+	}
+	t.Logf("Checking BGP metrics as expected on OTG")
+	verifyOTGBGPTelemetry(t, otg, config, expectedBGPMetric)
+	otgutils.LogBGPv4Metrics(t, otg, config)
+
+	expectedIsIsMetric = map[string]OTGIsIsMetric{
+		"p1d1.isis1": {
+			L1Ups: 1,
+			L2Ups: 0,
+		},
+		"lag1d1.isis1": {
+			L1Ups: 1,
 			L2Ups: 0,
 		},
 	}
@@ -780,39 +889,39 @@ func configureOTG(t *testing.T, otg *otg.OTG) gosnappi.Config {
 		SetPrefix(24)
 
 	// BGP on device 1
-	// p1d1inf := p1d1.Bgp().SetRouterId("11.1.1.2").Ipv4Interfaces().Add().
-	// 	SetIpv4Name(p1d1eth1ip1.Name())
+	p1d1inf := p1d1.Bgp().SetRouterId("11.1.1.2").Ipv4Interfaces().Add().
+		SetIpv4Name(p1d1eth1ip1.Name())
 
-	// p1d1infpeer1 := p1d1inf.Peers().Add().
-	// 	SetName("p1d1.bgp1").
-	// 	SetPeerAddress("11.1.1.1").
-	// 	SetAsNumber(65100).
-	// 	SetAsType("ebgp")
+	p1d1infpeer1 := p1d1inf.Peers().Add().
+		SetName("p1d1.bgp1").
+		SetPeerAddress("11.1.1.1").
+		SetAsNumber(65100).
+		SetAsType("ebgp")
 
-	// p1d1infpeer1.Advanced().SetKeepAliveInterval(5)
+	p1d1infpeer1.Advanced().SetKeepAliveInterval(5).SetHoldTimeInterval(15)
 
-	// p1d1infpeer1v4 := p1d1infpeer1.V4Routes().Add().
-	// 	SetName("p1d1.bgp1.v4")
-	// p1d1infpeer1v4.Advanced().
-	// 	SetMultiExitDiscriminator(50).
-	// 	SetOrigin("egp")
+	p1d1infpeer1v4 := p1d1infpeer1.V4Routes().Add().
+		SetName("p1d1.bgp1.v4")
+	p1d1infpeer1v4.Advanced().
+		SetMultiExitDiscriminator(50).
+		SetOrigin("egp")
 
-	// p1d1infpeer1v4.Addresses().Add().
-	// 	SetAddress("111.1.0.1").
-	// 	SetPrefix(32).
-	// 	SetCount(1).
-	// 	SetStep(1)
+	p1d1infpeer1v4.Addresses().Add().
+		SetAddress("111.1.0.1").
+		SetPrefix(32).
+		SetCount(1).
+		SetStep(1)
 
-	// p1d1infpeer1v4.Communities().Add().
-	// 	SetAsCustom(2).
-	// 	SetAsNumber(1).
-	// 	SetType("manual_as_number")
+	p1d1infpeer1v4.Communities().Add().
+		SetAsCustom(2).
+		SetAsNumber(1).
+		SetType("manual_as_number")
 
-	// p1d1infpeer1v4.AsPath().
-	// 	SetAsSetMode("include_as_set").
-	// 	Segments().Add().
-	// 	SetAsNumbers([]int64{1, 2}).
-	// 	SetType("as_seq")
+	p1d1infpeer1v4.AsPath().
+		SetAsSetMode("include_as_set").
+		Segments().Add().
+		SetAsNumbers([]int64{1, 2}).
+		SetType("as_seq")
 
 	// ISIS on device 1
 	p1d1isis1 := p1d1.Isis().
@@ -842,8 +951,8 @@ func configureOTG(t *testing.T, otg *otg.OTG) gosnappi.Config {
 	//ISIS L1 settings
 	p1d1isis1intf1.
 		L1Settings().
-		SetDeadInterval(30).
-		SetHelloInterval(10).
+		SetDeadInterval(15).
+		SetHelloInterval(5).
 		SetPriority(0)
 	//ISIS advanced settings
 	p1d1isis1intf1.
@@ -865,39 +974,39 @@ func configureOTG(t *testing.T, otg *otg.OTG) gosnappi.Config {
 		SetPrefix(24)
 
 	// BGP on device2
-	// lag1d1inf := lag1d1.Bgp().SetRouterId("21.1.1.2").Ipv4Interfaces().Add().
-	// 	SetIpv4Name(lag1d1eth1ip1.Name())
+	lag1d1inf := lag1d1.Bgp().SetRouterId("21.1.1.2").Ipv4Interfaces().Add().
+		SetIpv4Name(lag1d1eth1ip1.Name())
 
-	// lag1d1infpeer1 := lag1d1inf.Peers().Add().
-	// 	SetName("lag1d1.bgp1").
-	// 	SetPeerAddress("21.1.1.1").
-	// 	SetAsNumber(65300).
-	// 	SetAsType("ebgp")
+	lag1d1infpeer1 := lag1d1inf.Peers().Add().
+		SetName("lag1d1.bgp1").
+		SetPeerAddress("21.1.1.1").
+		SetAsNumber(65300).
+		SetAsType("ebgp")
 
-	// lag1d1infpeer1.Advanced().SetKeepAliveInterval(5)
+	lag1d1infpeer1.Advanced().SetKeepAliveInterval(5).SetHoldTimeInterval(15)
 
-	// lag1d1infpeer1v4 := lag1d1infpeer1.V4Routes().Add().
-	// 	SetName("lag1d1.bgp1.v4")
-	// lag1d1infpeer1v4.Advanced().
-	// 	SetMultiExitDiscriminator(50).
-	// 	SetOrigin("egp")
+	lag1d1infpeer1v4 := lag1d1infpeer1.V4Routes().Add().
+		SetName("lag1d1.bgp1.v4")
+	lag1d1infpeer1v4.Advanced().
+		SetMultiExitDiscriminator(50).
+		SetOrigin("egp")
 
-	// lag1d1infpeer1v4.Addresses().Add().
-	// 	SetAddress("211.1.0.1").
-	// 	SetPrefix(32).
-	// 	SetCount(10).
-	// 	SetStep(1)
+	lag1d1infpeer1v4.Addresses().Add().
+		SetAddress("211.1.0.1").
+		SetPrefix(32).
+		SetCount(10).
+		SetStep(1)
 
-	// lag1d1infpeer1v4.Communities().Add().
-	// 	SetAsCustom(2).
-	// 	SetAsNumber(1).
-	// 	SetType("manual_as_number")
+	lag1d1infpeer1v4.Communities().Add().
+		SetAsCustom(2).
+		SetAsNumber(1).
+		SetType("manual_as_number")
 
-	// lag1d1infpeer1v4.AsPath().
-	// 	SetAsSetMode("include_as_set").
-	// 	Segments().Add().
-	// 	SetAsNumbers([]int64{100, 200}).
-	// 	SetType("as_seq")
+	lag1d1infpeer1v4.AsPath().
+		SetAsSetMode("include_as_set").
+		Segments().Add().
+		SetAsNumbers([]int64{100, 200}).
+		SetType("as_seq")
 
 	// ISIS on device 2
 	lag1d1isis1 := lag1d1.Isis().
@@ -927,8 +1036,8 @@ func configureOTG(t *testing.T, otg *otg.OTG) gosnappi.Config {
 	//isis L1 settings
 	lag1d1isis1intf1.
 		L1Settings().
-		SetDeadInterval(30).
-		SetHelloInterval(10).
+		SetDeadInterval(15).
+		SetHelloInterval(5).
 		SetPriority(0)
 	//isis advanced settings
 	lag1d1isis1intf1.

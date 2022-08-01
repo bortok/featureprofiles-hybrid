@@ -142,12 +142,12 @@ func LogBGPv4Metrics(t testing.TB, otg *otg.OTG, c gosnappi.Config) {
 	t.Helper()
 	var out strings.Builder
 	out.WriteString("\nOTG BGPv4 Metrics\n")
-	for i := 1; i <= 130; i++ {
+	for i := 1; i <= 140; i++ {
 		out.WriteString("-")
 	}
 	out.WriteString("\n")
 	fmt.Fprintf(&out,
-		"%-15s%-15s%-15s%-15s%-15s%-18s%-18s%-18s%-15s\n",
+		"%-15s%-15s%-15s%-15s%-15s%-20s%-20s%-20s%-15s\n",
 		"Name",
 		"State",
 		"Flaps",
@@ -173,14 +173,14 @@ func LogBGPv4Metrics(t testing.TB, otg *otg.OTG, c gosnappi.Config) {
 				keepalivesTx := bgpv4Metric.GetCounters().GetOutKeepalives()
 				keepalivesRx := bgpv4Metric.GetCounters().GetInKeepalives()
 				out.WriteString(fmt.Sprintf(
-					"%-15v%-15v%-15v%-15v%-15v%-18v%-18v%-18v%-15v\n",
+					"%-15v%-15v%-15v%-15v%-15v%-20v%-20v%-20v%-15v\n",
 					name, state, flaps, routesTx, routesRx, routesWithdrawTx, routesWithdrawRx, keepalivesTx, keepalivesRx,
 				))
 
 			}
 		}
 	}
-	fmt.Fprintln(&out, strings.Repeat("-", 130))
+	fmt.Fprintln(&out, strings.Repeat("-", 140))
 	out.WriteString("\n\n")
 	t.Log(out.String())
 }
