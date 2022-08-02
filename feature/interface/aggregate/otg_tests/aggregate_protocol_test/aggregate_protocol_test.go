@@ -434,9 +434,9 @@ func TestAggregateLacpProtocol(t *testing.T) {
 	otgLacpAsExpected(t, otg, config, expectedOtgLacpMetrics)
 	otgutils.LogLacpMetrics(t, otg, config)
 
-	bgpHoldTime := config.Devices().Items()[1].Bgp().Ipv4Interfaces().Items()[0].Peers().Items()[0].Advanced().HoldTimeInterval() + 5
-	t.Logf("Waiting for BGP hold interval to over...")
-	time.Sleep(time.Duration(bgpHoldTime) * time.Second)
+	bgpWaitTime := config.Devices().Items()[1].Bgp().Ipv4Interfaces().Items()[0].Peers().Items()[0].Advanced().HoldTimeInterval() + 5
+	t.Logf("Waiting for BGP to stay up beyond hold timeout interval")
+	time.Sleep(time.Duration(bgpWaitTime) * time.Second)
 
 	expectedBGPMetric = map[string]OTGBGPMetric{
 		"p1d1.bgp1":   {State: "ESTABLISHED"},
@@ -538,8 +538,8 @@ func TestAggregateLacpProtocol(t *testing.T) {
 	otgLacpAsExpected(t, otg, config, expectedOtgLacpMetrics)
 	otgutils.LogLacpMetrics(t, otg, config)
 
-	t.Logf("Waiting for BGP hold interval to over...")
-	time.Sleep(time.Duration(bgpHoldTime) * time.Second)
+	t.Logf("Waiting for BGP to stay up beyond hold timeout interval")
+	time.Sleep(time.Duration(bgpWaitTime) * time.Second)
 	expectedBGPMetric = map[string]OTGBGPMetric{
 		"p1d1.bgp1":   {State: "ESTABLISHED"},
 		"lag1d1.bgp1": {State: "ESTABLISHED"},
@@ -740,8 +740,8 @@ func TestAggregateLacpProtocol(t *testing.T) {
 	t.Logf("Check LACP Member status on DUT")
 	dutLacpMemberPortsAsExpected(t, dut, expectedLacpMemberPortsMap)
 
-	t.Logf("Waiting for BGP hold interval to over...")
-	time.Sleep(time.Duration(bgpHoldTime) * time.Second)
+	t.Logf("Waiting for BGP to stay up beyond hold timeout interval")
+	time.Sleep(time.Duration(bgpWaitTime) * time.Second)
 
 	expectedBGPMetric = map[string]OTGBGPMetric{
 		"p1d1.bgp1":   {State: "ESTABLISHED"},
