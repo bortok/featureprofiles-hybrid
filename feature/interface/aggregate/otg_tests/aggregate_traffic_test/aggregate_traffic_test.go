@@ -416,7 +416,6 @@ func TestAggregateTraffic(t *testing.T) {
 	t.Logf("Check Interface status on DUT after 4 of 8 port links down (up links = min links)")
 	dutVerifyInterfaceStatus(t, dut, "Port-Channel1", "UP")
 
-	time.Sleep(5 * time.Second)
 	otg.StartTraffic(t)
 	expectedOtgPortMetrics = map[string]OtgPortMetric{
 		"port1": {
@@ -541,6 +540,53 @@ func TestAggregateTraffic(t *testing.T) {
 
 	t.Logf("Check Interface status on DUT after 3 of 4 port links down (up links < min links)")
 	dutVerifyInterfaceStatus(t, dut, "Port-Channel1", "LOWER_LAYER_DOWN")
+
+	otg.StartTraffic(t)
+	expectedOtgPortMetrics = map[string]OtgPortMetric{
+		"port1": {
+			TxPackets: 0,
+			RxPackets: 0,
+		},
+		"port2": {
+			TxPackets: 0,
+			RxPackets: 0,
+		},
+		"port3": {
+			TxPackets: 0,
+			RxPackets: 0,
+		},
+		"port4": {
+			TxPackets: 0,
+			RxPackets: 0,
+		},
+		"port5": {
+			TxPackets: 0,
+			RxPackets: 0,
+		},
+		"port6": {
+			TxPackets: 0,
+			RxPackets: 0,
+		},
+		"port7": {
+			TxPackets: 0,
+			RxPackets: 0,
+		},
+		"port8": {
+			TxPackets: 0,
+			RxPackets: 0,
+		},
+		"port9": {
+			TxPackets: 0,
+			RxPackets: 0,
+		},
+	}
+
+	t.Logf("Check port & flow stats on OTG after lag is down (up links < min links)")
+	otgPortMetricAsExpected(t, otg, config, expectedOtgPortMetrics)
+	otgutils.LogPortMetrics(t, otg, config)
+	otgutils.LogFlowMetrics(t, otg, config)
+
+	otg.StopTraffic(t)
 
 }
 
