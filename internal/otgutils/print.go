@@ -294,3 +294,33 @@ func LogISISLspStates(t testing.TB, otg *otg.OTG, c gosnappi.Config) {
 	out.WriteString("\n\n")
 	t.Log(out.String())
 }
+
+// LogISISMetrics displays otg ISIS stats.
+func LogISISMetrics(t testing.TB, otg *otg.OTG, c gosnappi.Config) {
+	t.Helper()
+	var out strings.Builder
+	out.WriteString("\nISIS Metrics\n")
+	fmt.Fprintln(&out, strings.Repeat("-", 120))
+	out.WriteString("\n")
+	fmt.Fprintf(&out,
+		"%-25s%-25s%-25s%-25s%-25s%-25s%-25s\n",
+		"Name", "L1 Sessions Up", "L1 Sessions Flap", "L1 Sessions DB Size", "L2 Sessions Up", "L2 Sessions Flap", "L2 Sessions DB Size")
+	for _, device := range c.Devices().Items() {
+		routerName := device.Isis().Name()
+		isisMetrics := otg.Telemetry().IsisRouter(routerName).Counters().Get(t)
+		l1SessionsUp := isisMetrics.GetLevel1().GetSessionsUp()
+		l1SessionsFlap := isisMetrics.GetLevel1().GetSessionsFlap()
+		l1DatabaseSize := isisMetrics.GetLevel1().GetDatabaseSize()
+		l2SessionsUp := isisMetrics.GetLevel2().GetSessionsUp()
+		l2SessionsFlap := isisMetrics.GetLevel2().GetSessionsFlap()
+		l2DatabaseSize := isisMetrics.GetLevel2().GetDatabaseSize()
+
+		out.WriteString(fmt.Sprintf(
+			"%-25v%-25v%-25v%-25v%-25v%-25v%-25v\n",
+			routerName, l1SessionsUp, l1SessionsFlap, l1DatabaseSize, l2SessionsUp, l2SessionsFlap, l2DatabaseSize,
+		))
+	}
+	fmt.Fprintln(&out, strings.Repeat("-", 120))
+	out.WriteString("\n\n")
+	t.Log(out.String())
+}
