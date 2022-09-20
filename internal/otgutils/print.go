@@ -146,3 +146,151 @@ func LogLacpMetrics(t testing.TB, otg *otg.OTG, c gosnappi.Config) {
 	out.WriteString("\n\n")
 	t.Log(out.String())
 }
+
+// LogISISLspStates is displaying otg isis lsp states.
+func LogISISLspStates(t testing.TB, otg *otg.OTG, c gosnappi.Config) {
+	t.Helper()
+	var out strings.Builder
+	out.WriteString("\nOTG ISIS LSP States\n")
+	for i := 1; i <= 120; i++ {
+		out.WriteString("-")
+	}
+	out.WriteString("\n")
+	fmt.Fprintf(&out,
+		"%-10s%-15s%-18s%-15s%-15s%-20s%-20s\n",
+		"LAG",
+		"Member Port",
+		"Synchronization",
+		"Collecting",
+		"Distributing",
+		"System Id",
+		"Partner Id")
+
+	for _, device := range c.Devices().Items() {
+		if device.HasIsis() {
+			routerName := device.Isis().Name()
+			for i := 1; i <= 120; i++ {
+				out.WriteString("-")
+			}
+			out.WriteString("\n")
+			out.WriteString(fmt.Sprintf("LSP for the ISIS Router: %s\n", routerName))
+			for i := 1; i <= 120; i++ {
+				out.WriteString("-")
+			}
+			out.WriteString("\n")
+			isisLsps := otg.Telemetry().IsisRouter(routerName).LinkStateDatabase().LspsAny().Get(t)
+			for _, isisLsp := range isisLsps {
+				for i := 1; i <= 120; i++ {
+					out.WriteString("-")
+				}
+				out.WriteString("\n")
+				out.WriteString(fmt.Sprintf("Details of LSP-Id: %s\n", isisLsp.GetLspId()))
+				for i := 1; i <= 120; i++ {
+					out.WriteString("-")
+				}
+				out.WriteString("\n")
+				out.WriteString(fmt.Sprintf("Pdu Type: %s\n", isisLsp.PduType.String()))
+				if isisLsp.PduLength != nil {
+					out.WriteString(fmt.Sprintf("Pdu Length: %v\n", isisLsp.GetPduLength()))
+				}
+				out.WriteString(fmt.Sprintf("ISIS Type: %v\n", isisLsp.GetIsType()))
+				if isisLsp.SequenceNumber != nil {
+					out.WriteString(fmt.Sprintf("Pdu Length: %v\n", isisLsp.GetSequenceNumber()))
+				}
+
+				if isisLsp.Flags != nil {
+					flags := []string{}
+					for _, flag := range isisLsp.GetFlags() {
+						flags = append(flags, flag.String())
+					}
+					out.WriteString(fmt.Sprintf("Flags: %v\n", strings.Join(flags, ",")))
+				}
+
+				if isisLsp.Tlvs != nil {
+					out.WriteString("Tlvs:\n")
+					tlvs := isisLsp.GetTlvs()
+					if tlvs.Hostnames != nil {
+						out.WriteString(" -Hostnames:\n")
+						if tlvs.GetHostnames().Hostname != nil {
+							out.WriteString(fmt.Sprintf("   -Hostname: %v\n", tlvs.GetHostnames().GetHostname()))
+						}
+					}
+					if tlvs.IsReachability != nil {
+						out.WriteString(" -IsReachability:\n")
+						if tlvs.GetIsReachability().Neighbor != nil {
+							out.WriteString("   -Neighbors:\n")
+							for _, neighborInfo := range tlvs.GetIsReachability().Neighbor {
+								out.WriteString(fmt.Sprintf("     -SystemId: %v\n", neighborInfo.GetSystemId()))
+							}
+						}
+					}
+					if tlvs.Ipv4InternalReachability != nil {
+						out.WriteString(" -Ipv4InternalReachability:\n")
+						if tlvs.GetIpv4InternalReachability().Prefix != nil {
+							out.WriteString("   -Prefixes:\n")
+							for prefix, prefixInfo := range tlvs.GetIpv4InternalReachability().Prefix {
+								out.WriteString(fmt.Sprintf("     -Address: %v\n", prefix))
+								out.WriteString(fmt.Sprintf("      Length: %v\n", prefixInfo.GetPrefixLength()))
+								out.WriteString(fmt.Sprintf("      Default Metric: %v\n", prefixInfo.GetDefaultMetric()))
+								out.WriteString(fmt.Sprintf("      Origin: %v\n", prefixInfo.OriginType.String()))
+								out.WriteString(fmt.Sprintf("      Redistribution: %v\n", prefixInfo.RedistributionType.String()))
+							}
+						}
+					}
+					if tlvs.Ipv4ExternalReachability != nil {
+						out.WriteString(" -Ipv4ExternalReachability:\n")
+						if tlvs.GetIpv4ExternalReachability().Prefix != nil {
+							out.WriteString("   -Prefixes:\n")
+							for prefix, prefixInfo := range tlvs.GetIpv4ExternalReachability().Prefix {
+								out.WriteString(fmt.Sprintf("     -Address: %v\n", prefix))
+								out.WriteString(fmt.Sprintf("      Length: %v\n", prefixInfo.GetPrefixLength()))
+								out.WriteString(fmt.Sprintf("      Default Metric: %v\n", prefixInfo.GetDefaultMetric()))
+								out.WriteString(fmt.Sprintf("      Origin: %v\n", prefixInfo.OriginType.String()))
+								out.WriteString(fmt.Sprintf("      Redistribution: %v\n", prefixInfo.RedistributionType.String()))
+							}
+						}
+					}
+					if tlvs.ExtendedIsReachability != nil {
+						out.WriteString(" -ExtendedIsReachability:\n")
+						if tlvs.GetExtendedIsReachability().Neighbor != nil {
+							out.WriteString("   -Neighbors:\n")
+							for _, neighborInfo := range tlvs.GetExtendedIsReachability().Neighbor {
+								out.WriteString(fmt.Sprintf("     -SystemId: %v\n", neighborInfo.GetSystemId()))
+							}
+						}
+					}
+					if tlvs.ExtendedIpv4Reachability != nil {
+						out.WriteString(" -ExtendedIpv4Reachability:\n")
+						if tlvs.GetExtendedIpv4Reachability().Prefix != nil {
+							out.WriteString("   -Prefixes:\n")
+							for prefix, prefixInfo := range tlvs.GetExtendedIpv4Reachability().Prefix {
+								out.WriteString(fmt.Sprintf("     -Address: %v\n", prefix))
+								out.WriteString(fmt.Sprintf("      Length: %v\n", prefixInfo.GetPrefixLength()))
+								out.WriteString(fmt.Sprintf("      Metric: %v\n", prefixInfo.GetMetric()))
+								out.WriteString(fmt.Sprintf("      Redistribution: %v\n", prefixInfo.RedistributionType.String()))
+							}
+						}
+					}
+					if tlvs.Ipv6Reachability != nil {
+						out.WriteString(" -Ipv6Reachability:\n")
+						if tlvs.GetIpv6Reachability().Prefix != nil {
+							out.WriteString("   -Prefixes:\n")
+							for prefix, prefixInfo := range tlvs.GetIpv6Reachability().Prefix {
+								out.WriteString(fmt.Sprintf("     -Address: %v\n", prefix))
+								out.WriteString(fmt.Sprintf("      Length: %v\n", prefixInfo.GetPrefixLength()))
+								out.WriteString(fmt.Sprintf("      Metric: %v\n", prefixInfo.GetMetric()))
+								out.WriteString(fmt.Sprintf("      Origin: %v\n", prefixInfo.OriginType.String()))
+								out.WriteString(fmt.Sprintf("      Redistribution: %v\n", prefixInfo.RedistributionType.String()))
+							}
+						}
+					}
+				}
+
+			}
+
+		}
+	}
+	fmt.Fprintln(&out, strings.Repeat("-", 120))
+	out.WriteString("\n\n")
+	t.Log(out.String())
+}
