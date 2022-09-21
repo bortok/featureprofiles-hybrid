@@ -50,6 +50,11 @@ type OtgPortMetric struct {
 	RxPackets uint64
 }
 
+type OtgFlowMetric struct {
+	TxPackets uint64
+	RxPackets uint64
+}
+
 func TestMain(m *testing.M) {
 	fptest.RunTests(m)
 }
@@ -144,7 +149,7 @@ func otgPortMetricAsExpected(t *testing.T, otg *otg.OTG, config gosnappi.Config,
 		portPath := otg.Telemetry().Port(port)
 		_, ok := portPath.Counters().OutFrames().Watch(t, time.Minute,
 			func(val *otgtelemetry.QualifiedUint64) bool {
-				return val.IsPresent() && val.Val(t) >= expOtgPortMetric.TxPackets
+				return val.IsPresent() && val.Val(t) == expOtgPortMetric.TxPackets
 			}).Await(t)
 		if !ok {
 			otgutils.LogPortMetrics(t, otg, config)
@@ -158,6 +163,29 @@ func otgPortMetricAsExpected(t *testing.T, otg *otg.OTG, config gosnappi.Config,
 		if !ok {
 			otgutils.LogPortMetrics(t, otg, config)
 			t.Fatal(t, "for port ", port, " Rx Packets: ", portPath.Counters().InFrames().Get(t), "but expected: ", expOtgPortMetric.RxPackets)
+		}
+	}
+}
+
+func otgFlowMetricAsExpected(t *testing.T, otg *otg.OTG, config gosnappi.Config, expectedOtgFlowMetrics map[string]OtgFlowMetric) {
+	for flow, expOtgFlowMetric := range expectedOtgFlowMetrics {
+		flowPath := otg.Telemetry().Flow(flow)
+		_, ok := flowPath.Counters().OutPkts().Watch(t, time.Minute,
+			func(val *otgtelemetry.QualifiedUint64) bool {
+				return val.IsPresent() && val.Val(t) == expOtgFlowMetric.TxPackets
+			}).Await(t)
+		if !ok {
+			otgutils.LogPortMetrics(t, otg, config)
+			t.Fatal(t, "for flow ", flow, " Tx Packets: ", flowPath.Counters().OutPkts().Get(t), "but expected: ", expOtgFlowMetric.TxPackets)
+		}
+
+		_, ok = flowPath.Counters().InPkts().Watch(t, time.Minute,
+			func(val *otgtelemetry.QualifiedUint64) bool {
+				return val.IsPresent() && val.Val(t) == expOtgFlowMetric.RxPackets
+			}).Await(t)
+		if !ok {
+			otgutils.LogPortMetrics(t, otg, config)
+			t.Fatal(t, "for flow ", flow, " Rx Packets: ", flowPath.Counters().InPkts().Get(t), "but expected: ", expOtgFlowMetric.RxPackets)
 		}
 	}
 }
@@ -324,8 +352,15 @@ func TestAggregateTraffic(t *testing.T) {
 			RxPackets: 0,
 		},
 	}
+	expectedOtgFlowMetrics := map[string]OtgFlowMetric{
+		"lag-f1": {
+			TxPackets: 80,
+			RxPackets: 80,
+		},
+	}
 
 	t.Logf("Check port & flow stats on OTG after 0 of 8 port links down (up links > min links)")
+	otgFlowMetricAsExpected(t, otg, config, expectedOtgFlowMetrics)
 	otgPortMetricAsExpected(t, otg, config, expectedOtgPortMetrics)
 	otgutils.LogPortMetrics(t, otg, config)
 	otgutils.LogFlowMetrics(t, otg, config)
@@ -456,7 +491,15 @@ func TestAggregateTraffic(t *testing.T) {
 		},
 	}
 
+	expectedOtgFlowMetrics = map[string]OtgFlowMetric{
+		"lag-f1": {
+			TxPackets: 80,
+			RxPackets: 80,
+		},
+	}
+
 	t.Logf("Check port & flow stats on OTG after 4 of 8 port links down (up links = min links)")
+	otgFlowMetricAsExpected(t, otg, config, expectedOtgFlowMetrics)
 	otgPortMetricAsExpected(t, otg, config, expectedOtgPortMetrics)
 	otgutils.LogPortMetrics(t, otg, config)
 	otgutils.LogFlowMetrics(t, otg, config)
@@ -581,7 +624,155 @@ func TestAggregateTraffic(t *testing.T) {
 		},
 	}
 
+	expectedOtgFlowMetrics = map[string]OtgFlowMetric{
+		"lag-f1": {
+			TxPackets: 80,
+			RxPackets: 0,
+		},
+	}
+
 	t.Logf("Check port & flow stats on OTG after lag is down (up links < min links)")
+	otgFlowMetricAsExpected(t, otg, config, expectedOtgFlowMetrics)
+	otgPortMetricAsExpected(t, otg, config, expectedOtgPortMetrics)
+	otgutils.LogPortMetrics(t, otg, config)
+	otgutils.LogFlowMetrics(t, otg, config)
+
+	otg.StopTraffic(t)
+
+	// as up links >  min links
+	fmt.Println("Making Lag Member port2-6 up")
+	otg.EnableLACPMembers(
+		t, []string{
+			"port2",
+			"port3",
+			"port4",
+			"port5",
+			"port6",
+		})
+
+	expectedLacpMemberPortsMap = map[string]map[string]DUTLacpMember{
+		"Port-Channel1": {
+			dut.Port(t, "port2").Name(): {Synchronization: "IN_SYNC", Collecting: true, Distributing: true},
+			dut.Port(t, "port3").Name(): {Synchronization: "IN_SYNC", Collecting: true, Distributing: true},
+			dut.Port(t, "port4").Name(): {Synchronization: "IN_SYNC", Collecting: true, Distributing: true},
+			dut.Port(t, "port5").Name(): {Synchronization: "IN_SYNC", Collecting: true, Distributing: true},
+			dut.Port(t, "port6").Name(): {Synchronization: "IN_SYNC", Collecting: true, Distributing: true},
+			dut.Port(t, "port7").Name(): {Synchronization: "IN_SYNC", Collecting: true, Distributing: true},
+			dut.Port(t, "port8").Name(): {Synchronization: "IN_SYNC", Collecting: true, Distributing: true},
+			dut.Port(t, "port9").Name(): {Synchronization: "IN_SYNC", Collecting: true, Distributing: true},
+		},
+	}
+
+	t.Logf("Check Lacp Member status on DUT")
+	dutLacpMemberPortsAsExpected(t, dut, expectedLacpMemberPortsMap)
+
+	expectedOtgLagMetrics = map[string]OtgLagMetric{
+		"lag1": {Status: "UP", MemberPortsUp: 8},
+	}
+
+	t.Logf("Checking Lag metrics as expected on OTG")
+	otgLagAsExpected(t, otg, config, expectedOtgLagMetrics)
+	otgutils.LogLagMetrics(t, otg, config)
+
+	expectedOtgLacpMetrics = map[string]OtgLacpMetric{
+		"port2": {
+			Synchronization: "IN_SYNC",
+			Collecting:      true,
+			Distributing:    true,
+		},
+		"port3": {
+			Synchronization: "IN_SYNC",
+			Collecting:      true,
+			Distributing:    true,
+		},
+		"port4": {
+			Synchronization: "IN_SYNC",
+			Collecting:      true,
+			Distributing:    true,
+		},
+		"port5": {
+			Synchronization: "IN_SYNC",
+			Collecting:      true,
+			Distributing:    true,
+		},
+		"port6": {
+			Synchronization: "IN_SYNC",
+			Collecting:      true,
+			Distributing:    true,
+		},
+		"port7": {
+			Synchronization: "IN_SYNC",
+			Collecting:      true,
+			Distributing:    true,
+		},
+		"port8": {
+			Synchronization: "IN_SYNC",
+			Collecting:      true,
+			Distributing:    true,
+		},
+		"port9": {
+			Synchronization: "IN_SYNC",
+			Collecting:      true,
+			Distributing:    true,
+		},
+	}
+
+	t.Logf("Checking Lacp metrics as expected on OTG")
+	otgLacpAsExpected(t, otg, config, expectedOtgLacpMetrics)
+	otgutils.LogLacpMetrics(t, otg, config)
+
+	t.Logf("Check Interface status on DUT after 0 of 8 port links down (up links > min links)")
+	dutVerifyInterfaceStatus(t, dut, "Port-Channel1", "UP")
+
+	otg.StartTraffic(t)
+	expectedOtgPortMetrics = map[string]OtgPortMetric{
+		"port1": {
+			TxPackets: 0,
+			RxPackets: 80,
+		},
+		"port2": {
+			TxPackets: 10,
+			RxPackets: 0,
+		},
+		"port3": {
+			TxPackets: 10,
+			RxPackets: 0,
+		},
+		"port4": {
+			TxPackets: 10,
+			RxPackets: 0,
+		},
+		"port5": {
+			TxPackets: 10,
+			RxPackets: 0,
+		},
+		"port6": {
+			TxPackets: 10,
+			RxPackets: 0,
+		},
+		"port7": {
+			TxPackets: 10,
+			RxPackets: 0,
+		},
+		"port8": {
+			TxPackets: 10,
+			RxPackets: 0,
+		},
+		"port9": {
+			TxPackets: 10,
+			RxPackets: 0,
+		},
+	}
+
+	expectedOtgFlowMetrics = map[string]OtgFlowMetric{
+		"lag-f1": {
+			TxPackets: 80,
+			RxPackets: 80,
+		},
+	}
+
+	t.Logf("Check port & flow stats on OTG after 0 of 8 port links down (up links > min links)")
+	otgFlowMetricAsExpected(t, otg, config, expectedOtgFlowMetrics)
 	otgPortMetricAsExpected(t, otg, config, expectedOtgPortMetrics)
 	otgutils.LogPortMetrics(t, otg, config)
 	otgutils.LogFlowMetrics(t, otg, config)
@@ -732,7 +923,7 @@ func configureOTG(t *testing.T, otg *otg.OTG) gosnappi.Config {
 	flow1.TxRx().SetChoice("port").Port().SetTxName(lag1.Name()).SetRxName(port1.Name())
 	flow1.Duration().SetChoice("fixed_packets").FixedPackets().SetPackets(80)
 	flow1.Size().SetChoice("fixed").SetFixed(128)
-	flow1.Rate().SetChoice("pps").SetPps(2)
+	flow1.Rate().SetChoice("pps").SetPps(10)
 	flow1Eth := flow1.Packet().Add().SetChoice("ethernet").Ethernet()
 	flow1Eth.Dst().SetChoice("value")
 	flow1Eth.Src().SetChoice("value").SetValue("00:22:01:00:00:01")
