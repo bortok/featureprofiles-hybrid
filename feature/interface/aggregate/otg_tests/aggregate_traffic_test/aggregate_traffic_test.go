@@ -317,45 +317,45 @@ func TestAggregateTraffic(t *testing.T) {
 	expectedOtgPortMetrics := map[string]OtgPortMetric{
 		"port1": {
 			TxPackets: 0,
-			RxPackets: 80,
+			RxPackets: 800,
 		},
 		"port2": {
-			TxPackets: 10,
+			TxPackets: 100,
 			RxPackets: 0,
 		},
 		"port3": {
-			TxPackets: 10,
+			TxPackets: 100,
 			RxPackets: 0,
 		},
 		"port4": {
-			TxPackets: 10,
+			TxPackets: 100,
 			RxPackets: 0,
 		},
 		"port5": {
-			TxPackets: 10,
+			TxPackets: 100,
 			RxPackets: 0,
 		},
 		"port6": {
-			TxPackets: 10,
+			TxPackets: 100,
 			RxPackets: 0,
 		},
 		"port7": {
-			TxPackets: 10,
+			TxPackets: 100,
 			RxPackets: 0,
 		},
 		"port8": {
-			TxPackets: 10,
+			TxPackets: 100,
 			RxPackets: 0,
 		},
 		"port9": {
-			TxPackets: 10,
+			TxPackets: 100,
 			RxPackets: 0,
 		},
 	}
 	expectedOtgFlowMetrics := map[string]OtgFlowMetric{
-		"lag-f1": {
-			TxPackets: 80,
-			RxPackets: 80,
+		"lag1->port1": {
+			TxPackets: 800,
+			RxPackets: 800,
 		},
 	}
 
@@ -455,7 +455,7 @@ func TestAggregateTraffic(t *testing.T) {
 	expectedOtgPortMetrics = map[string]OtgPortMetric{
 		"port1": {
 			TxPackets: 0,
-			RxPackets: 80,
+			RxPackets: 800,
 		},
 		"port2": {
 			TxPackets: 0,
@@ -474,27 +474,27 @@ func TestAggregateTraffic(t *testing.T) {
 			RxPackets: 0,
 		},
 		"port6": {
-			TxPackets: 20,
+			TxPackets: 200,
 			RxPackets: 0,
 		},
 		"port7": {
-			TxPackets: 20,
+			TxPackets: 200,
 			RxPackets: 0,
 		},
 		"port8": {
-			TxPackets: 20,
+			TxPackets: 200,
 			RxPackets: 0,
 		},
 		"port9": {
-			TxPackets: 20,
+			TxPackets: 200,
 			RxPackets: 0,
 		},
 	}
 
 	expectedOtgFlowMetrics = map[string]OtgFlowMetric{
-		"lag-f1": {
-			TxPackets: 80,
-			RxPackets: 80,
+		"lag1->port1": {
+			TxPackets: 800,
+			RxPackets: 800,
 		},
 	}
 
@@ -625,8 +625,8 @@ func TestAggregateTraffic(t *testing.T) {
 	}
 
 	expectedOtgFlowMetrics = map[string]OtgFlowMetric{
-		"lag-f1": {
-			TxPackets: 80,
+		"lag1->port1": {
+			TxPackets: 800,
 			RxPackets: 0,
 		},
 	}
@@ -728,46 +728,46 @@ func TestAggregateTraffic(t *testing.T) {
 	expectedOtgPortMetrics = map[string]OtgPortMetric{
 		"port1": {
 			TxPackets: 0,
-			RxPackets: 80,
+			RxPackets: 800,
 		},
 		"port2": {
-			TxPackets: 10,
+			TxPackets: 100,
 			RxPackets: 0,
 		},
 		"port3": {
-			TxPackets: 10,
+			TxPackets: 100,
 			RxPackets: 0,
 		},
 		"port4": {
-			TxPackets: 10,
+			TxPackets: 100,
 			RxPackets: 0,
 		},
 		"port5": {
-			TxPackets: 10,
+			TxPackets: 100,
 			RxPackets: 0,
 		},
 		"port6": {
-			TxPackets: 10,
+			TxPackets: 100,
 			RxPackets: 0,
 		},
 		"port7": {
-			TxPackets: 10,
+			TxPackets: 100,
 			RxPackets: 0,
 		},
 		"port8": {
-			TxPackets: 10,
+			TxPackets: 100,
 			RxPackets: 0,
 		},
 		"port9": {
-			TxPackets: 10,
+			TxPackets: 100,
 			RxPackets: 0,
 		},
 	}
 
 	expectedOtgFlowMetrics = map[string]OtgFlowMetric{
-		"lag-f1": {
-			TxPackets: 80,
-			RxPackets: 80,
+		"lag1->port1": {
+			TxPackets: 800,
+			RxPackets: 800,
 		},
 	}
 
@@ -896,7 +896,7 @@ func configureOTG(t *testing.T, otg *otg.OTG) gosnappi.Config {
 		SetMac("00:11:01:00:00:01").
 		SetMtu(1500)
 
-	p1d1eth1.Ipv4Addresses().Add().
+	p1d1eth1ip1 := p1d1eth1.Ipv4Addresses().Add().
 		SetName("p1d1.eth1.ip1").
 		SetAddress("11.1.1.2").
 		SetGateway("11.1.1.1").
@@ -911,19 +911,19 @@ func configureOTG(t *testing.T, otg *otg.OTG) gosnappi.Config {
 		SetMac("00:22:01:00:00:01").
 		SetMtu(1500)
 
-	lag1d1eth1.Ipv4Addresses().Add().
+	lag1d1eth1ip1 := lag1d1eth1.Ipv4Addresses().Add().
 		SetName("lag1d1.eth1.ip1").
 		SetAddress("21.1.1.2").
 		SetGateway("21.1.1.1").
 		SetPrefix(24)
 
 	// flow lag1 -> port1
-	flow1 := config.Flows().Add().SetName("lag-f1")
+	flow1 := config.Flows().Add().SetName("lag1->port1")
 	flow1.Metrics().SetEnable(true)
-	flow1.TxRx().SetChoice("port").Port().SetTxName(lag1.Name()).SetRxName(port1.Name())
-	flow1.Duration().SetChoice("fixed_packets").FixedPackets().SetPackets(80)
+	flow1.TxRx().SetChoice("device").Device().SetTxNames([]string{lag1d1eth1ip1.Name()}).SetRxNames([]string{p1d1eth1ip1.Name()})
+	flow1.Duration().SetChoice("fixed_packets").FixedPackets().SetPackets(800)
 	flow1.Size().SetChoice("fixed").SetFixed(128)
-	flow1.Rate().SetChoice("pps").SetPps(10)
+	flow1.Rate().SetChoice("pps").SetPps(100)
 	flow1Eth := flow1.Packet().Add().SetChoice("ethernet").Ethernet()
 	flow1Eth.Dst().SetChoice("value")
 	flow1Eth.Src().SetChoice("value").SetValue("00:22:01:00:00:01")
