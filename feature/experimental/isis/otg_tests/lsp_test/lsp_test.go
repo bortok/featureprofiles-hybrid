@@ -22,6 +22,15 @@ type OtgISISLsp struct {
 	Ipv6ReachabilityTlvCount         int
 }
 
+type OtgISISMetric struct {
+	L1SessionsUp   uint64
+	L1SessionsFlap uint64
+	L1DatabaseSize uint64
+	L2SessionsUp   uint64
+	L2SessionsFlap uint64
+	L2DatabaseSize uint64
+}
+
 func checkOTGISISLspStates(t *testing.T, otg *otg.OTG, config gosnappi.Config, expectedOTGISISLspStates map[string][]OtgISISLsp) bool {
 	for routerName, otgISISLsps := range expectedOTGISISLspStates {
 		isisLsps := otg.Telemetry().IsisRouter(routerName).LinkStateDatabase().LspsAny().Get(t)
@@ -81,6 +90,58 @@ func waitFor(fn func() bool, t testing.TB) {
 		}
 		time.Sleep(500 * time.Millisecond)
 	}
+}
+
+func verifyOTGISISTelemetry(t *testing.T, otg *otg.OTG, c gosnappi.Config, expectedOTGISISMetric map[string]OtgISISMetric) {
+	for routerName, expectedOTGISISMetric := range expectedOTGISISMetric {
+		isisCounterPath := otg.Telemetry().IsisRouter(routerName).Counters()
+		_, ok := isisCounterPath.Level1().SessionsUp().Watch(t, time.Minute,
+			func(val *otgtelemetry.QualifiedUint64) bool {
+				return val.IsPresent() && val.Val(t) == expectedOTGISISMetric.L1SessionsUp
+			}).Await(t)
+		if !ok {
+			t.Fatal(t, "ISIS router ", routerName, " L1SessionUp is ", isisCounterPath.Level1().SessionsUp().Get(t), " but Expected ", expectedOTGISISMetric.L1SessionsUp)
+		}
+		_, ok = isisCounterPath.Level1().SessionsFlap().Watch(t, time.Minute,
+			func(val *otgtelemetry.QualifiedUint64) bool {
+				return val.IsPresent() && val.Val(t) == expectedOTGISISMetric.L1SessionsFlap
+			}).Await(t)
+		if !ok {
+			t.Fatal(t, "ISIS router ", routerName, " L1SessionsFlap is ", isisCounterPath.Level1().SessionsFlap().Get(t), " but Expected ", expectedOTGISISMetric.L1SessionsFlap)
+		}
+
+		_, ok = isisCounterPath.Level1().DatabaseSize().Watch(t, time.Minute,
+			func(val *otgtelemetry.QualifiedUint64) bool {
+				return val.IsPresent() && val.Val(t) == expectedOTGISISMetric.L1DatabaseSize
+			}).Await(t)
+		if !ok {
+			t.Fatal(t, "ISIS router ", routerName, " L1DatabaseSize is ", isisCounterPath.Level1().DatabaseSize().Get(t), " but Expected ", expectedOTGISISMetric.L1DatabaseSize)
+		}
+
+		_, ok = isisCounterPath.Level2().SessionsUp().Watch(t, time.Minute,
+			func(val *otgtelemetry.QualifiedUint64) bool {
+				return val.IsPresent() && val.Val(t) == expectedOTGISISMetric.L2SessionsUp
+			}).Await(t)
+		if !ok {
+			t.Fatal(t, "ISIS router ", routerName, " L2SessionUp is ", isisCounterPath.Level2().SessionsUp().Get(t), " but Expected ", expectedOTGISISMetric.L2SessionsUp)
+		}
+		_, ok = isisCounterPath.Level2().SessionsFlap().Watch(t, time.Minute,
+			func(val *otgtelemetry.QualifiedUint64) bool {
+				return val.IsPresent() && val.Val(t) == expectedOTGISISMetric.L2SessionsFlap
+			}).Await(t)
+		if !ok {
+			t.Fatal(t, "ISIS router ", routerName, " L2SessionsFlap is ", isisCounterPath.Level2().SessionsFlap().Get(t), " but Expected ", expectedOTGISISMetric.L2SessionsFlap)
+		}
+
+		_, ok = isisCounterPath.Level2().DatabaseSize().Watch(t, time.Minute,
+			func(val *otgtelemetry.QualifiedUint64) bool {
+				return val.IsPresent() && val.Val(t) == expectedOTGISISMetric.L2DatabaseSize
+			}).Await(t)
+		if !ok {
+			t.Fatal(t, "ISIS router ", routerName, " L2DatabaseSize is ", isisCounterPath.Level2().DatabaseSize().Get(t), " but Expected ", expectedOTGISISMetric.L2DatabaseSize)
+		}
+	}
+
 }
 
 func TestMain(m *testing.M) {
