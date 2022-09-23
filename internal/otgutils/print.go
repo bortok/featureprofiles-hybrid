@@ -156,15 +156,6 @@ func LogISISLspStates(t testing.TB, otg *otg.OTG, c gosnappi.Config) {
 		out.WriteString("-")
 	}
 	out.WriteString("\n")
-	fmt.Fprintf(&out,
-		"%-10s%-15s%-18s%-15s%-15s%-20s%-20s\n",
-		"LAG",
-		"Member Port",
-		"Synchronization",
-		"Collecting",
-		"Distributing",
-		"System Id",
-		"Partner Id")
 
 	for _, device := range c.Devices().Items() {
 		if device.HasIsis() {
@@ -173,7 +164,7 @@ func LogISISLspStates(t testing.TB, otg *otg.OTG, c gosnappi.Config) {
 				out.WriteString("-")
 			}
 			out.WriteString("\n")
-			out.WriteString(fmt.Sprintf("LSP for the ISIS Router: %s\n", routerName))
+			out.WriteString(fmt.Sprintf("Received LSP for the ISIS Router: %s\n", routerName))
 			for i := 1; i <= 120; i++ {
 				out.WriteString("-")
 			}
@@ -300,7 +291,7 @@ func LogISISMetrics(t testing.TB, otg *otg.OTG, c gosnappi.Config) {
 	t.Helper()
 	var out strings.Builder
 	out.WriteString("\nISIS Metrics\n")
-	fmt.Fprintln(&out, strings.Repeat("-", 120))
+	fmt.Fprintln(&out, strings.Repeat("-", 180))
 	out.WriteString("\n")
 	fmt.Fprintf(&out,
 		"%-25s%-25s%-25s%-25s%-25s%-25s%-25s\n",
@@ -320,7 +311,7 @@ func LogISISMetrics(t testing.TB, otg *otg.OTG, c gosnappi.Config) {
 			routerName, l1SessionsUp, l1SessionsFlap, l1DatabaseSize, l2SessionsUp, l2SessionsFlap, l2DatabaseSize,
 		))
 	}
-	fmt.Fprintln(&out, strings.Repeat("-", 120))
+	fmt.Fprintln(&out, strings.Repeat("-", 180))
 	out.WriteString("\n\n")
 	t.Log(out.String())
 }
