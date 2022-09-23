@@ -89,7 +89,7 @@ func waitFor(fn func() bool, t testing.TB) {
 	for {
 		done := fn()
 		if done {
-			t.Logf("Expected BGP Prefix received")
+			t.Logf("Expected ISIS LSP received")
 			break
 		}
 		if time.Since(start) > time.Minute {
