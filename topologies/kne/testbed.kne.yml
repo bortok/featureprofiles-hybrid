@@ -1,0 +1,4 @@
+username: admin
+password: admin
+topology: /home/athena/featureprofiles/topologies/kne/arista_ixia_lag.textproto
+cli: kne_cli
