@@ -317,45 +317,45 @@ func TestAggregateTraffic(t *testing.T) {
 	expectedOtgPortMetrics := map[string]OtgPortMetric{
 		"port1": {
 			TxPackets: 0,
-			RxPackets: 800,
+			RxPackets: 4000,
 		},
 		"port2": {
-			TxPackets: 100,
+			TxPackets: 500,
 			RxPackets: 0,
 		},
 		"port3": {
-			TxPackets: 100,
+			TxPackets: 500,
 			RxPackets: 0,
 		},
 		"port4": {
-			TxPackets: 100,
+			TxPackets: 500,
 			RxPackets: 0,
 		},
 		"port5": {
-			TxPackets: 100,
+			TxPackets: 500,
 			RxPackets: 0,
 		},
 		"port6": {
-			TxPackets: 100,
+			TxPackets: 500,
 			RxPackets: 0,
 		},
 		"port7": {
-			TxPackets: 100,
+			TxPackets: 500,
 			RxPackets: 0,
 		},
 		"port8": {
-			TxPackets: 100,
+			TxPackets: 500,
 			RxPackets: 0,
 		},
 		"port9": {
-			TxPackets: 100,
+			TxPackets: 500,
 			RxPackets: 0,
 		},
 	}
 	expectedOtgFlowMetrics := map[string]OtgFlowMetric{
 		"lag1->port1": {
-			TxPackets: 800,
-			RxPackets: 800,
+			TxPackets: 4000,
+			RxPackets: 4000,
 		},
 	}
 
@@ -455,7 +455,7 @@ func TestAggregateTraffic(t *testing.T) {
 	expectedOtgPortMetrics = map[string]OtgPortMetric{
 		"port1": {
 			TxPackets: 0,
-			RxPackets: 800,
+			RxPackets: 4000,
 		},
 		"port2": {
 			TxPackets: 0,
@@ -474,27 +474,27 @@ func TestAggregateTraffic(t *testing.T) {
 			RxPackets: 0,
 		},
 		"port6": {
-			TxPackets: 200,
+			TxPackets: 1000,
 			RxPackets: 0,
 		},
 		"port7": {
-			TxPackets: 200,
+			TxPackets: 1000,
 			RxPackets: 0,
 		},
 		"port8": {
-			TxPackets: 200,
+			TxPackets: 1000,
 			RxPackets: 0,
 		},
 		"port9": {
-			TxPackets: 200,
+			TxPackets: 1000,
 			RxPackets: 0,
 		},
 	}
 
 	expectedOtgFlowMetrics = map[string]OtgFlowMetric{
 		"lag1->port1": {
-			TxPackets: 800,
-			RxPackets: 800,
+			TxPackets: 4000,
+			RxPackets: 4000,
 		},
 	}
 
@@ -583,61 +583,6 @@ func TestAggregateTraffic(t *testing.T) {
 
 	t.Logf("Check Interface status on DUT after 3 of 4 port links down (up links < min links)")
 	dutVerifyInterfaceStatus(t, dut, "Port-Channel1", "LOWER_LAYER_DOWN")
-
-	otg.StartTraffic(t)
-	expectedOtgPortMetrics = map[string]OtgPortMetric{
-		"port1": {
-			TxPackets: 0,
-			RxPackets: 0,
-		},
-		"port2": {
-			TxPackets: 0,
-			RxPackets: 0,
-		},
-		"port3": {
-			TxPackets: 0,
-			RxPackets: 0,
-		},
-		"port4": {
-			TxPackets: 0,
-			RxPackets: 0,
-		},
-		"port5": {
-			TxPackets: 0,
-			RxPackets: 0,
-		},
-		"port6": {
-			TxPackets: 0,
-			RxPackets: 0,
-		},
-		"port7": {
-			TxPackets: 0,
-			RxPackets: 0,
-		},
-		"port8": {
-			TxPackets: 0,
-			RxPackets: 0,
-		},
-		"port9": {
-			TxPackets: 0,
-			RxPackets: 0,
-		},
-	}
-
-	expectedOtgFlowMetrics = map[string]OtgFlowMetric{
-		"lag1->port1": {
-			TxPackets: 800,
-			RxPackets: 0,
-		},
-	}
-
-	t.Logf("Check port & flow stats on OTG after lag is down (up links < min links)")
-	otgFlowMetricAsExpected(t, otg, config, expectedOtgFlowMetrics)
-	otgPortMetricAsExpected(t, otg, config, expectedOtgPortMetrics)
-	otgutils.LogPortMetrics(t, otg, config)
-	otgutils.LogFlowMetrics(t, otg, config)
-
-	otg.StopTraffic(t)
 
 	// as up links >  min links
 	fmt.Println("Making Lag Member port2-6 up")
@@ -728,46 +673,46 @@ func TestAggregateTraffic(t *testing.T) {
 	expectedOtgPortMetrics = map[string]OtgPortMetric{
 		"port1": {
 			TxPackets: 0,
-			RxPackets: 800,
+			RxPackets: 4000,
 		},
 		"port2": {
-			TxPackets: 100,
+			TxPackets: 500,
 			RxPackets: 0,
 		},
 		"port3": {
-			TxPackets: 100,
+			TxPackets: 500,
 			RxPackets: 0,
 		},
 		"port4": {
-			TxPackets: 100,
+			TxPackets: 500,
 			RxPackets: 0,
 		},
 		"port5": {
-			TxPackets: 100,
+			TxPackets: 500,
 			RxPackets: 0,
 		},
 		"port6": {
-			TxPackets: 100,
+			TxPackets: 500,
 			RxPackets: 0,
 		},
 		"port7": {
-			TxPackets: 100,
+			TxPackets: 500,
 			RxPackets: 0,
 		},
 		"port8": {
-			TxPackets: 100,
+			TxPackets: 500,
 			RxPackets: 0,
 		},
 		"port9": {
-			TxPackets: 100,
+			TxPackets: 500,
 			RxPackets: 0,
 		},
 	}
 
 	expectedOtgFlowMetrics = map[string]OtgFlowMetric{
 		"lag1->port1": {
-			TxPackets: 800,
-			RxPackets: 800,
+			TxPackets: 4000,
+			RxPackets: 4000,
 		},
 	}
 
@@ -921,9 +866,9 @@ func configureOTG(t *testing.T, otg *otg.OTG) gosnappi.Config {
 	flow1 := config.Flows().Add().SetName("lag1->port1")
 	flow1.Metrics().SetEnable(true)
 	flow1.TxRx().SetChoice("device").Device().SetTxNames([]string{lag1d1eth1ip1.Name()}).SetRxNames([]string{p1d1eth1ip1.Name()})
-	flow1.Duration().SetChoice("fixed_packets").FixedPackets().SetPackets(800)
+	flow1.Duration().SetChoice("fixed_packets").FixedPackets().SetPackets(4000)
 	flow1.Size().SetChoice("fixed").SetFixed(128)
-	flow1.Rate().SetChoice("pps").SetPps(100)
+	flow1.Rate().SetChoice("pps").SetPps(400)
 	flow1Eth := flow1.Packet().Add().SetChoice("ethernet").Ethernet()
 	flow1Eth.Dst().SetChoice("value")
 	flow1Eth.Src().SetChoice("value").SetValue("00:22:01:00:00:01")
