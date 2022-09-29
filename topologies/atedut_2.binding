@@ -37,6 +37,14 @@ duts {
     id: "port2"
     name: "Ethernet2/1"  # Change this to the actual port name.
   }
+  #ports {
+  #  id: "port3"
+  #  name: "Ethernet3/1"  # Change this to the actual port name.
+  #}
+  #ports {
+  #  id: "port4"
+  #  name: "Ethernet4/1"  # Change this to the actual port name.
+  #}
 }
 
 ates {
@@ -61,4 +69,12 @@ ates {
     id: "port2"
     name: "1/2"  # Change this to the actual port name.
   }
+  #ports {
+  #  id: "port3"
+  #  name: "1/3"  # Change this to the actual port name.
+  #}
+  #ports {
+  #  id: "port4"
+  #  name: "1/4"  # Change this to the actual port name.
+  #}
 }

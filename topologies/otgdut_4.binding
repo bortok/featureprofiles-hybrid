@@ -37,6 +37,14 @@ duts {
     id: "port2"
     name: "Ethernet2/1"  # Change this to the actual port name.
   }
+  ports {
+    id: "port3"
+    name: "Ethernet3/1"  # Change this to the actual port name.
+  }
+  ports {
+    id: "port4"
+    name: "Ethernet4/1"  # Change this to the actual port name.
+  }
 }
 
 ates {
@@ -61,5 +69,13 @@ ates {
   ports {
     id: "port2"
     name: "10.36.78.183/2"  # Change this to the ixia-c-hw port location.
+  }
+  ports {
+    id: "port3"
+    name: "10.36.78.183/3"  # Change this to the ixia-c-hw port location.
+  }
+  ports {
+    id: "port4"
+    name: "10.36.78.183/4"  # Change this to the ixia-c-hw port location.
   }
 }
