@@ -260,18 +260,12 @@ func TestEstablishAndDisconnect(t *testing.T) {
 
 	// ATE Configuration.
 	t.Log("configure port and BGP configs on ATE")
+	topo := configureATE(t, &bgpTestParams{localAS: ateAS, peerIP: dutAttrs.IPv4}, connExternal)
 	ate := ondatra.ATE(t, "ate")
-	port1 := ate.Port(t, "port1")
-	topo := ate.Topology().New()
-	iDut1 := topo.AddInterface(ateAttrs.Name).WithPort(port1)
-	iDut1.IPv4().WithAddress(ateAttrs.IPv4CIDR()).WithDefaultGateway(dutAttrs.IPv4)
-	bgpDut1 := iDut1.BGP()
-	bgpPeer := bgpDut1.AddPeer().WithPeerAddress(dutAttrs.IPv4).WithLocalASN(ateAS).WithTypeExternal().
-		WithMD5Key(authPassword).WithHoldTime(ateHoldTime)
 
 	t.Log("Pushing config to ATE and starting protocols...")
-	topo.Push(t)
-	topo.StartProtocols(t)
+	ate.OTG().PushConfig(t, topo)
+	ate.OTG().StartProtocols(t)
 
 	// Verify Port Status
 	t.Log("Verifying port status")
@@ -287,7 +281,7 @@ func TestEstablishAndDisconnect(t *testing.T) {
 
 	// Send Cease Notification from ATE to DUT
 	t.Log("Send Cease Notification from ATE to DUT")
-	ate.Actions().NewBGPPeerNotification().WithCode(6).WithSubCode(6).WithPeers(bgpPeer).Send(t)
+	// ate.Actions().NewBGPPeerNotification().WithCode(6).WithSubCode(6).WithPeers(bgpPeer).Send(t)
 
 	// Verify BGP session state : ACTIVE
 	t.Log("Verify BGP session state : ACTIVE")
@@ -301,7 +295,7 @@ func TestEstablishAndDisconnect(t *testing.T) {
 	}
 
 	// Clear config on DUT and ATE
-	topo.StopProtocols(t)
+	ate.OTG().StopProtocols(t)
 	dutConfPath.Replace(t, nil)
 }
 
