@@ -27,6 +27,10 @@ duts {
     target: "10.36.76.72:6030"
   }
 
+  gribi {
+    target: "10.36.76.72:6040"
+  }
+
   # Before this binding can be used with a topology, add ports mapping
   # from its topology ID to the actual port name on the device.
   ports {
