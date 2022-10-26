@@ -49,15 +49,16 @@ var (
 
 // Constants.
 const (
-	dutAS         = 65540
-	ateAS         = 65550
-	dutAS2        = 65536
-	ateAS2        = 65536
-	peerGrpName   = "BGP-PEER-GROUP"
-	authPassword  = "AUTHPASSWORD"
-	dutHoldTime   = 100
-	connRetryTime = 100
-	ateHoldTime   = 135
+	dutAS            = 65540
+	ateAS            = 65550
+	dutAS2           = 65536
+	ateAS2           = 65536
+	peerGrpName      = "BGP-PEER-GROUP"
+	authPassword     = "AUTHPASSWORD"
+	dutHoldTime      = 90
+	connRetryTime    = 100
+	ateHoldTime      = 135
+	dutKeepaliveTime = 30
 )
 
 type connType string
@@ -119,6 +120,7 @@ func bgpCreateNbr(bgpParams *bgpTestParams) *telemetry.NetworkInstance_Protocol_
 
 	nv4t := nv4.GetOrCreateTimers()
 	nv4t.HoldTime = ygot.Uint16(dutHoldTime)
+	nv4t.KeepaliveInterval = ygot.Uint16(dutKeepaliveTime)
 	nv4t.ConnectRetry = ygot.Uint16(connRetryTime)
 
 	nv4.GetOrCreateAfiSafi(telemetry.BgpTypes_AFI_SAFI_TYPE_IPV4_UNICAST).Enabled = ygot.Bool(true)
@@ -235,11 +237,10 @@ func TestEstablishAndDisconnect(t *testing.T) {
 	t.Log("Start DUT interface Config")
 	configureDUT(t, dut)
 
-	// Configure Network instance type and router id on DUT
+	// Configure Network instance type on DUT
 	t.Log("Configure Network Instance")
 	dutConfNIPath := dut.Config().NetworkInstance(*deviations.DefaultNetworkInstance)
 	dutConfNIPath.Type().Replace(t, telemetry.NetworkInstanceTypes_NETWORK_INSTANCE_TYPE_DEFAULT_INSTANCE)
-	dutConfNIPath.RouterId().Replace(t, dutAttrs.IPv4)
 
 	t.Log("Configure BGP")
 	dutConfPath := dut.Config().NetworkInstance(*deviations.DefaultNetworkInstance).Protocol(telemetry.PolicyTypes_INSTALL_PROTOCOL_TYPE_BGP, "BGP").Bgp()
@@ -250,6 +251,7 @@ func TestEstablishAndDisconnect(t *testing.T) {
 	dutConfPath.Replace(t, nil)
 	dutConf := bgpCreateNbr(&bgpTestParams{localAS: dutAS, peerAS: ateAS})
 	dutConfPath.Replace(t, dutConf)
+	fptest.LogYgot(t, "DUT BGP Config", dutConfPath, dutConfPath.Get(t))
 
 	// ATE Configuration.
 	t.Log("configure port and BGP configs on ATE")
@@ -306,11 +308,10 @@ func TestParameters(t *testing.T) {
 	dutIP := dutAttrs.IPv4
 	dut := ondatra.DUT(t, "dut")
 
-	// Configure Network instance type and router id on DUT
+	// Configure Network instance type on DUT
 	t.Log("Configure Network Instance")
 	dutConfNIPath := dut.Config().NetworkInstance(*deviations.DefaultNetworkInstance)
 	dutConfNIPath.Type().Replace(t, telemetry.NetworkInstanceTypes_NETWORK_INSTANCE_TYPE_DEFAULT_INSTANCE)
-	dutConfNIPath.RouterId().Replace(t, dutAttrs.IPv4)
 
 	dutConfPath := dut.Config().NetworkInstance(*deviations.DefaultNetworkInstance).Protocol(telemetry.PolicyTypes_INSTALL_PROTOCOL_TYPE_BGP, "BGP").Bgp()
 	statePath := dut.Telemetry().NetworkInstance(*deviations.DefaultNetworkInstance).Protocol(telemetry.PolicyTypes_INSTALL_PROTOCOL_TYPE_BGP, "BGP").Bgp()
@@ -350,6 +351,7 @@ func TestParameters(t *testing.T) {
 			dutConfPath.Replace(t, nil)
 			t.Log("Configure BGP Configs on DUT")
 			dutConfPath.Replace(t, tc.dutConf)
+			fptest.LogYgot(t, "DUT BGP Config ", dutConfPath, dutConfPath.Get(t))
 			t.Log("Configure BGP on ATE")
 			tc.ateConf.Push(t)
 			tc.ateConf.StartProtocols(t)

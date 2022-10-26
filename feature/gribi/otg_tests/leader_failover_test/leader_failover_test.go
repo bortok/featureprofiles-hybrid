@@ -276,6 +276,8 @@ func TestLeaderFailover(t *testing.T) {
 	}
 
 	t.Run("SINGLE_PRIMARY/PERSISTENCE=DELETE", func(t *testing.T) {
+		// This is an indicator test for gRIBI persistence DELETE, so we
+		// do not skip based on *deviations.GRIBIPreserveOnly.
 
 		// Set parameters for gRIBI client clientA.
 		// Set Persistence to false.
@@ -304,17 +306,17 @@ func TestLeaderFailover(t *testing.T) {
 			t.Run("VerifyTraffic", func(t *testing.T) {
 				verifyTraffic(ctx, t, args)
 			})
-
 		})
 
 		t.Logf("Time check: %s", time.Since(start))
 
 		// Close below is done through defer.
 		t.Log("Close gRIBI client connection")
-
 	})
 
 	t.Run("ShouldDelete", func(t *testing.T) {
+		// This is an indicator test for gRIBI persistence DELETE, so we
+		// do not skip based on *deviations.GRIBIPreserveOnly.
 
 		t.Logf("Verify through Telemetry and Traffic that the route to %s has been deleted after gRIBI client disconnected", ateDstNetCIDR)
 
@@ -331,7 +333,6 @@ func TestLeaderFailover(t *testing.T) {
 	})
 
 	t.Run("SINGLE_PRIMARY/PERSISTENCE=PRESERVE", func(t *testing.T) {
-
 		// Set parameters for gRIBI client clientA.
 		// Set Persistence to true.
 		clientA := &gribi.Client{
@@ -360,18 +361,15 @@ func TestLeaderFailover(t *testing.T) {
 			t.Run("VerifyTraffic", func(t *testing.T) {
 				verifyTraffic(ctx, t, args)
 			})
-
 		})
 
 		t.Logf("Time check: %s", time.Since(start))
 
 		// Close below is done through defer.
 		t.Log("Close gRIBI client connection again")
-
 	})
 
 	t.Run("ShouldPreserve", func(t *testing.T) {
-
 		t.Logf("Verify through Telemetry and Traffic that the route to %s is preserved", ateDstNetCIDR)
 
 		t.Run("VerifyAFT", func(t *testing.T) {
@@ -381,11 +379,9 @@ func TestLeaderFailover(t *testing.T) {
 		t.Run("VerifyTraffic", func(t *testing.T) {
 			verifyTraffic(ctx, t, args)
 		})
-
 	})
 
 	t.Run("ReconnectAndDelete", func(t *testing.T) {
-
 		// Set parameters for gRIBI client clientA.
 		// Set Persistence to true.
 		clientA := &gribi.Client{
@@ -403,7 +399,6 @@ func TestLeaderFailover(t *testing.T) {
 		defer clientA.Close(t)
 
 		t.Run("DeleteRoute", func(t *testing.T) {
-
 			t.Logf("Delete route to %s and verify through Telemetry and Traffic", ateDstNetCIDR)
 			clientA.DeleteIPv4(t, ateDstNetCIDR, *deviations.DefaultNetworkInstance, fluent.InstalledInRIB)
 
@@ -414,9 +409,7 @@ func TestLeaderFailover(t *testing.T) {
 			t.Run("VerifyNoTraffic", func(t *testing.T) {
 				verifyNoTraffic(ctx, t, args)
 			})
-
 		})
-
 	})
 
 	t.Logf("Test run time: %s", time.Since(start))
