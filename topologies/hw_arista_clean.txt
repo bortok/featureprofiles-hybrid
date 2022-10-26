@@ -1,0 +1,75 @@
+conf t 
+no interface Port-Channel1
+no interface Port-Channel2
+no interface Port-Channel3
+
+no router bgp 64500
+no neighbor resolution
+
+no route-map ALLOW-CONNECTED
+no route-map DENY-ALL
+no route-map PERMIT-ALL
+no route-map SET-ASPATH-PREPEND
+no route-map SET-LOCAL-PREF
+
+conf t
+interface Ethernet1/1
+no description DUT to ATE source
+no speed 400g-8
+switchport
+no ip address
+no ipv6 enable
+no ipv6 address
+no mac-address
+speed 400g-8
+no channel-group 
+no shut
+end
+
+conf t
+interface Ethernet2/1
+no description DUT to ATE source
+no speed 400g-8
+switchport
+no ip address
+no ipv6 enable
+no ipv6 address
+no mac-address
+speed 400g-8
+no channel-group 
+no shut
+end
+
+
+conf t
+interface Ethernet3/1
+no description DUT to ATE source
+no speed 400g-8
+switchport
+no ip address
+no ipv6 enable
+no ipv6 address
+no mac-address
+speed 400g-8
+no channel-group 
+no shut
+end
+
+conf t
+interface Ethernet4/1
+no description DUT to ATE source
+no speed 400g-8
+switchport
+no ip address
+no ipv6 enable
+no ipv6 address
+no mac-address
+speed 400g-8
+no channel-group 
+no shut
+end
+
+conf t
+port-channel min-links review interval 10
+interface Port-Channel1
+end
