@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"math/rand"
 	"net"
-	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -301,10 +300,8 @@ func (tc *testCase) configureDUT(t *testing.T) {
 		lacpPath.Replace(t, lacp)
 	}
 
-	matched, _ := regexp.MatchString("[/;]", tc.atePorts[0].Name())
-	if !matched {
-		tc.dut.Telemetry().Interface(tc.aggID).OperStatus().Await(t, 20*time.Second, opUp)
-	}
+	// TODO - to remove this sleep later
+	time.Sleep(5 * time.Second)
 
 	agg := &telemetry.Interface{Name: ygot.String(tc.aggID)}
 	tc.configDstAggregateDUT(agg, &dutDst)

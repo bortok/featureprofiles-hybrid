@@ -19,7 +19,6 @@ import (
 	"encoding/binary"
 	"fmt"
 	"net"
-	"regexp"
 	"sort"
 	"strconv"
 	"testing"
@@ -219,10 +218,8 @@ func (tc *testCase) configureDUT(t *testing.T) {
 	fptest.LogYgot(t, "LACP", lacpPath, lacp)
 	lacpPath.Replace(t, lacp)
 
-	matched, _ := regexp.MatchString("[/;]", tc.atePorts[0].Name())
-	if !matched {
-		tc.dut.Telemetry().Interface(tc.aggID).OperStatus().Await(t, 20*time.Second, opUp)
-	}
+	// TODO - to remove this sleep later
+	time.Sleep(5 * time.Second)
 
 	agg := &telemetry.Interface{Name: ygot.String(tc.aggID)}
 	tc.configDstAggregateDUT(agg, &dutDst)
@@ -379,7 +376,7 @@ func (tc *testCase) verifyATE(t *testing.T) {
 // setDutInterfaceWithState sets the admin state to a member of the lag
 func (tc *testCase) setDutInterfaceWithState(t testing.TB, p *ondatra.Port, state bool) {
 	dc := tc.dut.Config()
-	i := &telemetry.Interface{Name: ygot.String(p.Name())}
+	i := &telemetry.Interface{}
 	i.Enabled = ygot.Bool(state)
 	dc.Interface(p.Name()).Update(t, i)
 }
