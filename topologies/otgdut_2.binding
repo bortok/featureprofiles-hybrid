@@ -31,6 +31,17 @@ duts {
     target: "10.36.76.72:6040"
   }
 
+  ssh {
+    target: "10.36.76.72:22"
+    username: "admin"
+    password: "admin"
+    skip_verify: true
+  }
+
+  config {
+    cli_file: "/home/hashwini/workspace/github/featureprofiles/topologies/hw_arista_clean.txt"
+  }
+
   # Before this binding can be used with a topology, add ports mapping
   # from its topology ID to the actual port name on the device.
   ports {
@@ -45,15 +56,15 @@ duts {
 
 ates {
   id: "ate"
-  name: "10.72.46.124:8443"  # Change this to the Ixia-C-Controler hostname.
+  name: "10.36.75.165"  # Change this to the Ixia-C-Controler hostname.
 
   # This option specific to OTG over Ixia-HW. 
   otg {
-    target: "10.72.46.124:40051" # Change this to the Ixia-c-grpc server endpoint.
+    target: "10.36.75.165:40051" # Change this to the Ixia-c-grpc server endpoint.
   }
 
   gnmi {
-    target: "10.72.46.124:50051"  # Change this to the Ixia-c-gnmi server endpoint.
+    target: "10.36.75.165:50051"  # Change this to the Ixia-c-gnmi server endpoint.
   }
 
   # Before this binding can be used with a topology, add ports mapping
