@@ -115,7 +115,17 @@ func knownHostsCallback() (ssh.HostKeyCallback, error) {
 func (d *dialer) dialSSH() (*ssh.Client, error) {
 	c := &ssh.ClientConfig{
 		User: d.Username,
-		Auth: []ssh.AuthMethod{ssh.Password(d.Password)},
+		Auth: []ssh.AuthMethod{
+			ssh.KeyboardInteractive(func(user, instruction string, questions []string, echos []bool) ([]string, error) {
+				// Just send the password back for all questions
+				answers := make([]string, len(questions))
+				for i, _ := range answers {
+					answers[i] = d.Password
+				}
+
+				return answers, nil
+			}),
+		},
 	}
 	if d.SkipVerify {
 		c.HostKeyCallback = ssh.InsecureIgnoreHostKey()
@@ -125,7 +135,7 @@ func (d *dialer) dialSSH() (*ssh.Client, error) {
 			return nil, err
 		}
 		c.HostKeyCallback = cb
-	}
+	}	
 	return ssh.Dial("tcp", d.Target, c)
 }
 
@@ -270,4 +280,14 @@ func (r *resolver) ixnetwork(ateName string) (dialer, error) {
 	}
 	targetOptions := &bindpb.Options{Target: ate.Name}
 	return merge(targetOptions, r.Options, ate.Options, ate.Ixnetwork), nil
+}
+
+func SshInteractive(user, instruction string, questions []string, echos []bool) (answers []string, err error) {
+    answers = make([]string, len(questions))
+    // The second parameter is unused
+    for n, _ := range questions {
+        answers[n] = "admin"
+    }
+
+    return answers, nil
 }
